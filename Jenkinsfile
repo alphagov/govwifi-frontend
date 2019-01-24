@@ -33,7 +33,7 @@ pipeline {
 
       steps {
         script {
-          docker.build("${env.IMAGE_NAME}:staging")
+          docker.build("${env.IMAGE_NAME}:testing")
         }
       }
     }
@@ -48,7 +48,7 @@ pipeline {
       steps {
         script {
           withDockerRegistry(credentialsId: 'ecr:eu-west-2:jenkins-deploy', url: env.AWS_ECS_API_REGISTRY) {
-            docker.image("${env.IMAGE_NAME}:staging").push()
+            docker.image("${env.IMAGE_NAME}:testing").push()
           }
         }
       }
