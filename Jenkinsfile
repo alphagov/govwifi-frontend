@@ -1,5 +1,10 @@
 pipeline {
   agent none
+
+  options {
+    ansiColor('xterm')
+  }
+
   stages {
     stage('Linting') {
       agent any
