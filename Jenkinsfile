@@ -47,7 +47,7 @@ pipeline {
 
       steps {
         script {
-          docker.withDockerRegistry(credentialsId: 'ecr:eu-west-2:jenkins-deploy', url: env.AWS_ECS_API_REGISTRY) {
+          docker.withRegistry(credentialsId: 'ecr:eu-west-2:jenkins-deploy', url: env.AWS_ECS_API_REGISTRY) {
             docker.image("${env.IMAGE_NAME}:testing").push()
           }
         }
