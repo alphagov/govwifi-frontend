@@ -6,3 +6,5 @@
 !.ruby-version
 !**/.ruby-version
 
+# Avoid copying generated WPA config
+healtcheck/peap-mschapv2.conf

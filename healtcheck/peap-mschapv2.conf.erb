@@ -1,0 +1,16 @@
+#
+#   eapol_test -c peap-mschapv2.conf -s testing123
+#
+network={
+        ssid="<%= ssid %>"
+        key_mgmt=WPA-EAP
+        eap=PEAP
+        identity="<%= identity %>"
+        anonymous_identity="anonymous"
+        password="<%= password %>"
+        phase2="autheap=MSCHAPV2"
+
+	#
+	#  Uncomment the following to perform server certificate validation.
+#	ca_cert="/etc/raddb/certs/ca.der"
+}
