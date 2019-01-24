@@ -64,7 +64,7 @@ pipeline {
       }
     }
 
-    stage('Publish Staging Image') {
+    stage('Publish Production Image') {
       agent any
       when {
         branch 'master'
