@@ -49,7 +49,7 @@ pipeline {
       }
 
       steps {
-        deploy('testing-latest')
+        deploy('staging')
       }
     }
 
@@ -72,7 +72,7 @@ pipeline {
       }
 
       steps {
-        deploy('testing-latest')
+        deploy('latest')
       }
     }
   }
