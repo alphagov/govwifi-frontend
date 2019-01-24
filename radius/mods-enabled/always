@@ -1,0 +1,28 @@
+always reject {
+        rcode = reject
+}
+always fail {
+        rcode = fail
+}
+always ok {
+        rcode = ok
+}
+always handled {
+        rcode = handled
+}
+always invalid {
+        rcode = invalid
+}
+always userlock {
+        rcode = userlock
+}
+always notfound {
+        rcode = notfound
+}
+always noop {
+        rcode = noop
+}
+always updated {
+        rcode = updated
+}
+

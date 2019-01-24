@@ -1,0 +1,56 @@
+	eap {
+		default_eap_type = mschapv2
+		timer_expire     = 60
+		ignore_unknown_eap_types = no
+		cisco_accounting_username_bug = no
+		max_sessions = 4096
+		tls {
+			certificate_file = ${certdir}/server.pem
+      		ca_file = ${certdir}/ca.pem
+			private_key_password = whatever
+			private_key_file = ${certdir}/server.key
+			dh_file = ${certdir}/dh
+			random_file = /dev/urandom
+			check_crl = no
+			ca_path = ${cadir}
+			cipher_list = "DEFAULT"
+			ecdh_curve = "prime256v1"
+
+			cache {
+			      enable = no
+			      lifetime = 24
+			      max_entries = 255
+			}
+
+			verify {
+				tmpdir = /tmp/radiusd
+				client = "/usr/bin/openssl verify -CAfile ${certdir}/ca.pem %{TLS-Client-Cert-Filename}"
+			}
+
+			ocsp {
+				enable = no
+				override_cert_url = yes
+				url = "http://127.0.0.1/ocsp/"
+			}
+
+			staple {
+			}
+		}
+
+		ttls {
+			default_eap_type = md5
+			copy_request_to_tunnel = no
+			use_tunneled_reply = no
+			virtual_server = "inner-tunnel"
+		}
+
+		peap {
+			default_eap_type = mschapv2
+			copy_request_to_tunnel = yes
+			use_tunneled_reply = yes
+			virtual_server = "inner-tunnel"
+		}
+
+		mschapv2 {
+		}
+	}

@@ -1,0 +1,16 @@
+# Only allow user names with length 5 or 6 exactly. (Not case sensitive)
+filter_username {
+	if (&User-Name) {
+		if (!(&User-Name =~ /^[A-Za-z]{5,6}$/)) {
+			update request {
+                                &Module-Failure-Message += 'Rejected: User-Name not in the correct format'
+                        }
+                        reject
+                }
+	}
+}
+
+
+
+
+

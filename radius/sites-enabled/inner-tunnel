@@ -1,0 +1,34 @@
+server inner-tunnel {
+authorize {
+	filter_username
+	rest
+	eap {
+		ok = return
+	}
+}
+authenticate {
+	Auth-Type MS-CHAP {
+		mschap
+	}
+	eap
+}
+session {
+}
+post-auth {
+  redundant {
+    rest
+    ok
+  }
+  Post-Auth-Type REJECT {
+    redundant {
+      rest
+      fail
+    }
+  }
+}
+pre-proxy {
+}
+post-proxy {
+	eap
+}
+}

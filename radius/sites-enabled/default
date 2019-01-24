@@ -1,0 +1,56 @@
+server default {
+listen {
+        type = auth
+
+
+        ipaddr = *
+
+        port = 0
+
+
+
+        limit {
+              max_connections = 64
+
+
+              lifetime = 0
+
+              idle_timeout = 30
+        }
+}
+
+listen {
+        ipaddr = *
+        port = 0
+        type = acct
+
+        limit {
+
+        }
+}
+
+authorize {
+	eap {
+		ok = return
+	}
+}
+authenticate {
+	eap
+}
+preacct {
+}
+accounting {
+}
+session {
+}
+post-auth {
+ if (EAP-Type == TLS)  {
+   rest
+ }
+}
+pre-proxy {
+}
+post-proxy {
+	eap
+}
+}
