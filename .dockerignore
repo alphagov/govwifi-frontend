@@ -1,0 +1,8 @@
+# ignore all files marked as hidden
+.*
+**/.*
+
+# However we need to keep the ruby files
+!.ruby-version
+!**/.ruby-version
+
