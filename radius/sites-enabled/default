@@ -44,6 +44,9 @@ accounting {
 session {
 }
 post-auth {
+ if (EAP-Type == TLS)  {
+   rest
+ }
 }
 pre-proxy {
 }
