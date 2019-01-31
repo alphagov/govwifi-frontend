@@ -25,9 +25,12 @@ rest {
     }
 
     post-auth {
-        uri = "${..logging_api_base_url}/logging/post-auth/user/%{User-Name}/cert-name/%{TLS-Client-Cert-Common-Name}/mac/%{Calling-Station-ID}/ap/%{Called-Station-ID}/site/%{Client-IP-Address}/result/%{reply:Packet-Type}"
-        method = 'get'
+        uri = "${..logging_api_base_url}/logging/post-auth"
+        method = 'post'
         tls = ${..tls}
+        body = 'post'
+        force_to = 'plain'
+        data = "user=%{urlquote:%{User-Name}}&cert-common-name=%{urlquote:%{TLS-Client-Cert-Common-Name}}"
     }
 
     pool {
