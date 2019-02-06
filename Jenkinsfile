@@ -32,10 +32,10 @@ pipeline {
 
     stage('Acceptance Tests') {
       agent none
-      when {
-        branch 'master'
-        beforeAgent true
-      }
+      //when {
+      //  branch 'master'
+      //  beforeAgent true
+      //}
       steps {
         build 'govwifi-acceptance-tests/master'
       }
