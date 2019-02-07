@@ -2,14 +2,14 @@
 
 ## Purpose
 
-This is the [FreeRadius][freeradius] configuration for the [GovWiFi][govwifi] project.
+This is the [FreeRADIUS][freeradius] configuration for the [GovWiFi][govwifi] project.
 
 ## How to install and use
 
 Currently it is not possible to run this service from inside this repository alone.
 
 We instead recommend using the [acceptance-tests][acceptance-tests] repo to set up a development environment for
-making changes to Radius or the healtcheck service.
+making changes to FreeRADIUS or the healtcheck service.
 
 Makefile targets are:
 
