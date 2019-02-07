@@ -4,7 +4,6 @@
 
 This is the [FreeRadius][freeradius] configuration for the [GovWiFi][govwifi] project.
 
-
 ## How to install and use
 
 Currently it is not possible to run this service from inside this repository alone.
@@ -23,7 +22,7 @@ This projects has 2 main components; the Radius server, and the healthcheck serv
 
 ### Healthcheck
 
-The healthcheck service acts as an adapter so a monitoring service (Route53 Healthchecks).
+The healthcheck service acts as an adapter to a monitoring service (Route53 Healthchecks).
 When hit with a HTTP call, it will send a request to the radius server to ensure it can still
 authorise users.
 To accomplish this, [`eapol_test`][radius-testing] is used to simulate authentication using `PEAP-MSCHAPv2`.
@@ -49,8 +48,7 @@ There are currently 5 files fetched when the service is initialised.
 - ca.pem, server.pem, server.key, comodo.pem
   Used to set up TLS tunnels, and authenticate clients using EAP-TLS
 
-They are currently stored in an encrypted S3 bucket, and only the Radius servers are authorised to
-access files within the bucket.
+They are currently stored in the private [GovWifi build repo][govwifi-build].
 
 Files are fetched once a night when the servers are restarted for updates.
 
@@ -58,23 +56,23 @@ Files are fetched once a night when the servers are restarted for updates.
 
 When someone attempts to use GovWifi:
 
-1. The username and password is sent to the radius server
-2. Radius recieves, and sends a request to the [authentication backend][auth-backend] to fetch the known password
-3. The user password is checked against the known password
-4. the login attempt is logged in the [logging backend][logging-backend]
-5. either the user is accepted, or rejected depending on whether their password accepted.
+1.  The username and password is sent to the radius server
+2.  Radius recieves, and sends a request to the [authentication backend][auth-backend] to fetch the known password
+3.  The user password is checked against the known password
+4.  the login attempt is logged in the [logging backend][logging-backend]
+5.  either the user is accepted, or rejected depending on whether their password accepted.
 
 ## How to contribute
 
-1. Fork the project
-2. Create a feature or fix branch
-3. Run the linter: `make lint`
-4. Run the [acceptance tests][acceptance-tests]
-4. Raise a pull request
-
+1.  Fork the project
+2.  Create a feature or fix branch
+3.  Run the linter: `make lint`
+4.  Run the [acceptance tests][acceptance-tests]
+5.  Raise a pull request
 
 [govwifi]: https://www.gov.uk/government/publications/govwifi/govwifi
 [freeradius]: https://freeradius.org/
+[govwifi-build]: https://github.com/alphagov/govwifi-acceptance-tests
 [acceptance-tests]: https://github.com/alphagov/govwifi-acceptance-tests
 [radius-testing]: https://wiki.freeradius.org/guide/eduroam#testing
 [govwifi-admin]: https://admin.wifi.service.gov.uk
