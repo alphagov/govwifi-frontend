@@ -72,7 +72,7 @@ When someone attempts to use GovWifi:
 
 [govwifi]: https://www.gov.uk/government/publications/govwifi/govwifi
 [freeradius]: https://freeradius.org/
-[govwifi-build]: https://github.com/alphagov/govwifi-acceptance-tests
+[govwifi-build]: https://github.com/alphagov/govwifi-build
 [acceptance-tests]: https://github.com/alphagov/govwifi-acceptance-tests
 [radius-testing]: https://wiki.freeradius.org/guide/eduroam#testing
 [govwifi-admin]: https://admin.wifi.service.gov.uk
