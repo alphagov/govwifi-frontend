@@ -48,7 +48,7 @@ There are currently 5 files fetched when the service is initialised.
 - ca.pem, server.pem, server.key, comodo.pem
   Used to set up TLS tunnels, and authenticate clients using EAP-TLS
 
-They are currently stored in the private [GovWifi build repo][govwifi-build].
+They are currently stored in an encrypted S3 bucket, and only the RADIUS servers are authorised to access files within the bucket.
 
 Files are fetched once a night when the servers are restarted for updates.
 
