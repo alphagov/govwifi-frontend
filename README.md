@@ -9,7 +9,7 @@ This is the [FreeRADIUS][freeradius] configuration for the [GovWiFi][govwifi] pr
 Currently it is not possible to run this service from inside this repository alone.
 
 We instead recommend using the [acceptance-tests][acceptance-tests] repo to set up a development environment for
-making changes to FreeRADIUS or the healtcheck service.
+making changes to FreeRADIUS or the healthcheck service.
 
 Makefile targets are:
 
@@ -19,6 +19,8 @@ Makefile targets are:
 ## How it pieces together
 
 This projects has 2 main components; the Radius server, and the healthcheck service.
+
+Its deployments are controlled by a separate app, the [Safe Restarter][safe-restarter]
 
 ### Healthcheck
 
@@ -79,3 +81,4 @@ When someone attempts to use GovWifi:
 [freeradius-clients]: https://github.com/FreeRADIUS/freeradius-server/blob/v3.0.x/raddb/clients.conf
 [auth-backend]: https://github.com/alphagov/govwifi-authentication-api
 [logging-backend]: https://github.com/alphagov/govwifi-logging-api
+[safe-restarter]: https://github.com/alphagov/govwifi-safe-restarter 
