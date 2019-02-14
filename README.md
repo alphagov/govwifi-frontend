@@ -18,9 +18,9 @@ Makefile targets are:
 
 ## How it pieces together
 
-This projects has 2 main components; the Radius server, and the healthcheck service.
+This projects has 2 main components; the RADIUS server, and the healthcheck service.
 
-Its deployments are controlled by a separate app, the [Safe Restarter][safe-restarter]
+This RADIUS server is restarted daily by a separate app, the [Safe Restarter][safe-restarter].
 
 ### Healthcheck
 
