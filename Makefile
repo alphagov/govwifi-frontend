@@ -1,8 +1,14 @@
 
 
-DOCKER_COMPOSE = docker-compose
+DOCKER_COMPOSE = docker-compose -f docker-compose.yml
+
+ifndef JENKINS_URL
+  DOCKER_COMPOSE += -f docker-compose.development.yml
+endif
+
 RUN_APP = ${DOCKER_COMPOSE} run --rm app
 RUN_APP_PORTS = ${DOCKER_COMPOSE} run --rm --service-ports app
+
 
 build: docker-build
 
