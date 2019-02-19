@@ -1,0 +1,8 @@
+version: "3.4"
+
+services:
+  app:
+    ports:
+      - "3000"
+      - "1812/udp"
+      - "1813/udp"
