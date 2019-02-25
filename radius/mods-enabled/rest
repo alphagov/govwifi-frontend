@@ -10,6 +10,8 @@ rest {
     logging_api_base_url = "$ENV{LOGGING_API_BASE_URL}"
 
     authorize {
+        rewrite_called_station_id
+        rewrite_calling_station_id
         uri = "${..authorisation_api_base_url}/authorize/user/%{User-Name}/mac/%{Calling-Station-ID}/ap/%{Called-Station-ID}/site/%{Client-IP-Address}/apg/%{Aruba-AP-Group}/mdn/%{Meraki-Device-Name}"
         method = 'get'
         body = 'json'

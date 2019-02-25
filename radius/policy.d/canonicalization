@@ -1,0 +1,49 @@
+#
+#  Normalize the MAC Addresses in the Calling/Called-Station-Id
+#
+mac-addr-regexp = '([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})[^0-9a-f]?([0-9a-f]{2})'
+
+#
+#  Add "rewrite_called_station_id" in the "authorize" and
+#  "preacct" sections.
+#
+#  Makes Called-Station-ID conform to what RFC3580 says should
+#  be provided by 802.1X authenticators.
+#
+rewrite_called_station_id {
+	if (&Called-Station-Id && (&Called-Station-Id =~ /^${policy.mac-addr-regexp}([^0-9a-f](.+))?$/i)) {
+		update request {
+			&Called-Station-Id := "%{toupper:%{1}-%{2}-%{3}-%{4}-%{5}-%{6}}"
+		}
+
+		# SSID component?
+		if ("%{8}") {
+			update request {
+				&Called-Station-SSID := "%{8}"
+			}
+		}
+		updated
+	}
+	else {
+		noop
+	}
+}
+
+#
+#  Add "rewrite_calling_station_id" in the "authorize" and
+#  "preacct" sections.
+#
+#  Makes Calling-Station-ID conform to what RFC3580 says should
+#  be provided by 802.1X authenticators.
+#
+rewrite_calling_station_id {
+	if (&Calling-Station-Id && (&Calling-Station-Id =~ /^${policy.mac-addr-regexp}$/i)) {
+		update request {
+			&Calling-Station-Id := "%{toupper:%{1}-%{2}-%{3}-%{4}-%{5}-%{6}}"
+		}
+		updated
+	}
+	else {
+		noop
+	}
+}
