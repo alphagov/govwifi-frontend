@@ -1,0 +1,9 @@
+version: 1
+update_configs:
+  - package_manager: "ruby:bundler"
+    directory: "/healthcheck"
+    update_schedule: "live"
+
+  - package_manager: "docker"
+    directory: "/"
+    update_schedule: "daily"
