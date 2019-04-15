@@ -1,0 +1,23 @@
+---
+platform: linux
+
+inputs:
+  - name: src
+  # - name: docker-cache/<% image name %>-image
+
+outputs:
+  # aligns with PREBUILT_TAG
+  - name: docker-cache/app-prebuilt
+
+caches:
+  - path: docker-cache/app-prebuilt-cached
+
+params:
+  # Expose that we're using Concourse
+  ON_CONCOURSE: true
+  # Set this to custom image names for preloading the app image. see `docker-compose.concourse.yml`
+  PREBUILT_TAG: 'app-prebuilt'
+  PREBUILT_CACHED_DIR: 'docker-cache/app-prebuilt-cached'
+
+run:
+  path: src/ci/tasks/scripts/pre-build.sh

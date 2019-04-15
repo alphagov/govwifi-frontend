@@ -1,0 +1,11 @@
+version: '<% docker-compose schema version %>'
+
+# Overrides the `app` service to load from a prebuilt image when available
+
+services:
+  app:
+    # relates to ci/tasks/pre-build.yml
+    image: "app-prebuilt"
+    build:
+      cache_from:
+        - app-prebuilt

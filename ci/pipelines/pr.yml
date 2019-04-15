@@ -1,0 +1,101 @@
+resource_types:
+- name: pull-request
+  type: registry-image
+  source:
+    repository: teliaoss/github-pr-resource
+
+resources:
+  - name: pull-request
+    type: pull-request
+    check_every: 1m
+    source:
+      repository: <% org/repo %>
+      access_token: ((github-access-token))
+
+  - name: runner
+    # See https://github.com/alphagov/govwifi-concourse-runner for a reference dockerfile
+    # readonly_private_ecr_repo_url is provided by the hosted Concourse
+    type: docker-image
+    source:
+      repository: "((readonly_private_ecr_repo_url))"
+      tag: concourse-runner-latest
+
+  - name: <% image name %>-image
+    # set these to align with docker-compose.yml files, to prefetch + cache docker images
+    type: registry-image
+    source:
+      repository: <% image name %>
+      tag: '<% tag %>'
+
+jobs:
+  - name: lint & test
+    interruptible: true
+    # force people to use new git commits to rerun PRs
+    disable_manual_trigger: true
+    plan:
+      - aggregate:
+        - do:
+          - get: src
+            resource: pull-request
+            trigger: true
+            version: every
+          - <<: *update-status-pending
+
+        # fetch each image and place in the docker-cache directory
+        - get: 'docker-cache/<% image name %>-image'
+          resource: <% image name %>-image
+          params: {format: oci}
+
+        - get: runner
+
+      # used to avoid building multiple times down the road
+      - task: pre-build
+        privileged: true
+        image: runner
+        file: src/ci/tasks/pre-build.yml
+
+      - aggregate:
+        - task: lint
+          privileged: true
+          image: runner
+          file: src/ci/tasks/lint.yml
+        - task: test
+          privileged: true
+          image: runner
+          file: src/ci/tasks/test.yml
+
+    on_failure:
+      do:
+        - <<: *update-status-failure
+    on_success:
+      do:
+        - <<: *update-status-success
+
+update-status-commands:
+  update-status-base: &update-status-base
+    put: update-status
+    resource: pull-request
+    get_params:
+      skip_download: true
+
+  update-status-params-base: &update-status-params-base
+    path: src
+    context: 'pr'
+
+  update-status-pending: &update-status-pending
+    <<: *update-status-base
+    params:
+      <<: *update-status-params-base
+      status: pending
+
+  update-status-failure: &update-status-failure
+    <<: *update-status-base
+    params:
+      <<: *update-status-params-base
+      status: failure
+
+  update-status-success: &update-status-success
+    <<: *update-status-base
+    params:
+      <<: *update-status-params-base
+      status: success
