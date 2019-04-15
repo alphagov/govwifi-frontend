@@ -24,7 +24,7 @@ lint: lint-healthcheck lint-radius
 
 test: test-healthcheck test-radius
 
-.PHONY: build lint test
+.PHONY: build prebuild lint test
 
 ## healthcheck related tasks
 
