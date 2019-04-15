@@ -9,7 +9,7 @@ resources:
     type: pull-request
     check_every: 1m
     source:
-      repository: <% org/repo %>
+      repository: alphagov/govwifi-frontend
       access_token: ((github-access-token))
 
   - name: runner
@@ -20,12 +20,12 @@ resources:
       repository: "((readonly_private_ecr_repo_url))"
       tag: concourse-runner-latest
 
-  - name: <% image name %>-image
+  - name: alpine-image
     # set these to align with docker-compose.yml files, to prefetch + cache docker images
     type: registry-image
     source:
-      repository: <% image name %>
-      tag: '<% tag %>'
+      repository: alpine
+      tag: '3.8'
 
 jobs:
   - name: lint & test
@@ -42,8 +42,8 @@ jobs:
           - <<: *update-status-pending
 
         # fetch each image and place in the docker-cache directory
-        - get: 'docker-cache/<% image name %>-image'
-          resource: <% image name %>-image
+        - get: 'docker-cache/alpine-image'
+          resource: alpine-image
           params: {format: oci}
 
         - get: runner

@@ -4,7 +4,7 @@ platform: linux
 inputs:
   - name: src
   - name: docker-cache/app-prebuilt
-  # - name: docker-cache/<% image name %>-image
+  - name: docker-cache/alpine-image
 
 params:
   ON_CONCOURSE: true
