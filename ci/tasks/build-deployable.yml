@@ -1,0 +1,30 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source:
+    repository: concourse/builder-task
+
+# https://github.com/concourse/builder-task#params
+params:
+  REPOSITORY: 'govwifi/frontend'
+  CONTEXT: src
+  TAG:
+
+inputs:
+  - name: src
+
+outputs:
+  - name: image
+
+caches:
+  - path: cache
+
+run:
+  path: sh
+  args:
+    - '-exc'
+    - |
+      echo "$TAG" > image/tag
+      build
