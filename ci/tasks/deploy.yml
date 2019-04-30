@@ -1,0 +1,23 @@
+---
+platform: linux
+
+params:
+  STAGE:
+  AWS_ACCESS_KEY_ID:
+  AWS_DEFAULT_REGION:
+  AWS_SECRET_ACCESS_KEY:
+
+  # These are set for deploy.sh and migrate.sh
+  SERVICE_NAME: "frontend-service"
+  CLUSTER_NAME: "frontend-cluster"
+
+inputs:
+  - name: src
+  - name: deploy-tools
+
+run:
+  path: bash
+  args:
+    - '-exc'
+    - |
+      src/tasks/scripts/deploy.sh
