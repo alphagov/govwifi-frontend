@@ -20,5 +20,5 @@ params:
   PREBUILT_CACHED_DIR: 'docker-cache/app-prebuilt-cached'
 
 run:
-  path: /entrypoint
+  path: docker-wrapper
   args: [src/ci/tasks/scripts/pre-build.sh]

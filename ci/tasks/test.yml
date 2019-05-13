@@ -10,5 +10,5 @@ params:
   ON_CONCOURSE: true
 
 run:
-  path: /entrypoint
+  path: docker-wrapper
   args: [src/ci/tasks/scripts/test.sh]
