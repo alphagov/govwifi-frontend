@@ -27,10 +27,10 @@ rest {
     post-auth {
         uri = "${..logging_api_base_url}/logging/post-auth"
         method = 'post'
+        data = '{ "username": "%{User-Name}", "mac": "%{Calling-Station-ID}", "called_station_id": "%{Called-Station-ID}", "site_ip_address": "%{Client-IP-Address}", "cert_name": "%{TLS-Client-Cert-Common-Name}", "authentication_result": "%{reply:Packet-Type}" }'
+        body = 'json'
         tls = ${..tls}
-        body = 'post'
         force_to = 'plain'
-        data = "user=%{urlquote:%{User-Name}}&cert-common-name=%{urlquote:%{TLS-Client-Cert-Common-Name}}"
     }
 
     pool {
@@ -51,4 +51,3 @@ rest {
         idle_timeout = 60
     }
 }
-

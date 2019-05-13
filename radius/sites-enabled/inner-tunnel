@@ -1,10 +1,10 @@
 server inner-tunnel {
 authorize {
 	filter_username
-	rest
 	eap {
 		ok = return
 	}
+	rest
 }
 authenticate {
 	Auth-Type MS-CHAP {

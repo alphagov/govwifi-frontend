@@ -45,7 +45,10 @@ session {
 }
 post-auth {
  if (EAP-Type == TLS)  {
-   rest
+   redundant {
+     rest
+     ok
+   }
  }
 }
 pre-proxy {
