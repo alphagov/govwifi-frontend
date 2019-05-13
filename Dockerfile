@@ -9,7 +9,7 @@ RUN apk --no-cache add \
 # Set up the radius configs
 
 RUN mkdir /tmp/radiusd
-RUN mv /etc/raddb /etc/raddb.old
+RUN rm -rf /etc/raddb && mkdir -p /etc/raddb
 COPY radius /etc/raddb
 RUN openssl dhparam -out /etc/raddb/certs/dh 1024
 
