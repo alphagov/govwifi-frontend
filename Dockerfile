@@ -1,4 +1,4 @@
-FROM alpine:3.8
+FROM alpine:3.9.4
 
 EXPOSE 1812/udp 1813/udp 3000
 
