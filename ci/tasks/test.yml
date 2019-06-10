@@ -1,0 +1,14 @@
+---
+platform: linux
+
+inputs:
+  - name: src
+  - name: docker-cache/app-prebuilt
+  - name: docker-cache/alpine-image
+
+params:
+  ON_CONCOURSE: true
+
+run:
+  path: docker-wrapper
+  args: [src/ci/tasks/scripts/test.sh]

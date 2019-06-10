@@ -1,16 +1,15 @@
-FROM alpine:3.8
+FROM ruby:2.5.5-alpine3.8
 
 EXPOSE 1812/udp 1813/udp 3000
 
 RUN apk --no-cache add \
       wpa_supplicant freeradius freeradius-rest freeradius-eap openssl \
-      ruby ruby-rdoc ruby-bundler ruby-ffi \
-      ruby-dev make gcc libc-dev
+      make gcc libc-dev
 
 # Set up the radius configs
 
 RUN mkdir /tmp/radiusd
-RUN mv /etc/raddb /etc/raddb.old
+RUN rm -rf /etc/raddb && mkdir -p /etc/raddb
 COPY radius /etc/raddb
 RUN openssl dhparam -out /etc/raddb/certs/dh 1024
 
@@ -24,7 +23,7 @@ RUN bundle install $BUNDLE_ARGS
 COPY healthcheck ./
 
 # these were needed while bundling, but no longer
-RUN apk del ruby-dev make gcc libc-dev
+RUN apk del make gcc libc-dev
 
 # ensure we're in the correct workdir at the end
 WORKDIR /usr/src/healthcheck
@@ -46,10 +45,10 @@ ENV LOGGING_API_BASE_URL ""
 ENV RADIUSD_PARAMS ""
 
 CMD [ "/bin/sh", "-c", \
-  "wget $RADIUS_CONFIG_WHITELIST_URL -O /etc/raddb/clients.conf; \
-   wget ${CERT_STORE_URL}/ca.pem -O /etc/raddb/certs/ca.pem; \
-   wget ${CERT_STORE_URL}/comodoCA.pem -O /etc/raddb/certs/comodoCA.pem; \
-   wget ${CERT_STORE_URL}/server.key -O /etc/raddb/certs/server.key; \
-   wget ${CERT_STORE_URL}/server.pem -O /etc/raddb/certs/server.pem; \
-   bundle exec rackup -o 0.0.0.0 -p 3000 & /usr/sbin/radiusd $RADIUSD_PARAMS | cat" \
-]
+      "wget $RADIUS_CONFIG_WHITELIST_URL -O /etc/raddb/clients.conf; \
+      wget ${CERT_STORE_URL}/ca.pem -O /etc/raddb/certs/ca.pem; \
+      wget ${CERT_STORE_URL}/comodoCA.pem -O /etc/raddb/certs/comodoCA.pem; \
+      wget ${CERT_STORE_URL}/server.key -O /etc/raddb/certs/server.key; \
+      wget ${CERT_STORE_URL}/server.pem -O /etc/raddb/certs/server.pem; \
+      bundle exec rackup -o 0.0.0.0 -p 3000 & /usr/sbin/radiusd $RADIUSD_PARAMS | cat" \
+      ]
