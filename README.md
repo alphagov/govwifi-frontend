@@ -38,7 +38,8 @@ FreeRadius is an implementation of the RADIUS protocol.
 Our servers implement:
 
 - EAP-TLS (client certificate authentication)
-- PEAP-MSCHAPv2 (Protected EAP with username + password)
+- PEAP-PEAP (Protected EAP with username + password)
+- PEAP-MSCHAPv2 (Inner encryption protocol)
 
 #### Files
 
@@ -81,4 +82,4 @@ When someone attempts to use GovWifi:
 [freeradius-clients]: https://github.com/FreeRADIUS/freeradius-server/blob/v3.0.x/raddb/clients.conf
 [auth-backend]: https://github.com/alphagov/govwifi-authentication-api
 [logging-backend]: https://github.com/alphagov/govwifi-logging-api
-[safe-restarter]: https://github.com/alphagov/govwifi-safe-restarter 
+[safe-restarter]: https://github.com/alphagov/govwifi-safe-restarter
