@@ -39,7 +39,7 @@ Our servers implement:
 
 - EAP-TLS (client certificate authentication)
 - PEAP-PEAP (Protected EAP with username + password)
-- PEAP-MSCHAPv2 (Inner encryption protocol)
+- PEAP-MSCHAPv2 (Inner authentication protocol)
 
 #### Files
 
