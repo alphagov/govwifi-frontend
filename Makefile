@@ -6,10 +6,8 @@ ifdef ON_CONCOURSE
   DOCKER_COMPOSE += -f docker-compose.concourse.yml
 endif
 
-ifndef JENKINS_URL
-  ifndef ON_CONCOURSE
-    DOCKER_COMPOSE += -f docker-compose.development.yml
-  endif
+ifndef ON_CONCOURSE
+	DOCKER_COMPOSE += -f docker-compose.development.yml
 endif
 
 RUN_APP = ${DOCKER_COMPOSE} run --rm app
