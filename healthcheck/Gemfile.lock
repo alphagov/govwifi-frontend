@@ -9,12 +9,13 @@ GEM
       rubocop-rspec (~> 1.28)
       scss_lint
     jaro_winkler (1.5.3)
+    mustermann (1.0.3)
     parallel (1.17.0)
     parser (2.6.3.0)
       ast (~> 2.4.0)
     puma (3.12.1)
-    rack (1.6.11)
-    rack-protection (1.5.5)
+    rack (2.0.7)
+    rack-protection (2.0.5)
       rack
     rainbow (3.0.0)
     rake (12.3.2)
@@ -52,11 +53,12 @@ GEM
     scss_lint (0.58.0)
       rake (>= 0.9, < 13)
       sass (~> 3.5, >= 3.5.5)
-    sinatra (1.4.8)
-      rack (~> 1.5)
-      rack-protection (~> 1.4)
-      tilt (>= 1.3, < 3)
-    tilt (2.0.8)
+    sinatra (2.0.5)
+      mustermann (~> 1.0)
+      rack (~> 2.0)
+      rack-protection (= 2.0.5)
+      tilt (~> 2.0)
+    tilt (2.0.9)
     unicode-display_width (1.6.0)
 
 PLATFORMS
