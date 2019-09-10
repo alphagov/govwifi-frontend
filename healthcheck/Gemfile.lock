@@ -9,10 +9,12 @@ GEM
       rubocop-rspec (~> 1.28)
       scss_lint
     jaro_winkler (1.5.3)
+    nio4r (2.5.1)
     parallel (1.17.0)
     parser (2.6.3.0)
       ast (~> 2.4.0)
-    puma (3.12.1)
+    puma (4.1.1)
+      nio4r (~> 2.0)
     rack (1.6.11)
     rack-protection (1.5.5)
       rack
