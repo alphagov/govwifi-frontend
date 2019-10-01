@@ -1,4 +1,4 @@
-FROM ruby:2.5.5-alpine3.8
+FROM ruby:2.6.3-alpine3.9
 
 EXPOSE 1812/udp 1813/udp 3000
 
