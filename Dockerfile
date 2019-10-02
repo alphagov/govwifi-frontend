@@ -4,7 +4,8 @@ EXPOSE 1812/udp 1813/udp 3000
 
 RUN apk --no-cache add \
       wpa_supplicant freeradius freeradius-rest freeradius-eap openssl \
-      make gcc libc-dev
+      make gcc libc-dev python3 && \
+      pip3 install awscli
 
 # Set up the radius configs
 
@@ -36,8 +37,9 @@ ENV HEALTH_CHECK_RADIUS_KEY ""
 ENV HEALTH_CHECK_SSID ""
 
 ## radius fetched files
-ENV CERT_STORE_URL ""
-ENV RADIUS_CONFIG_WHITELIST_URL ""
+ENV CERT_STORE_BUCKET ""
+ENV WHITELIST_BUCKET ""
+ENV ENDPOINT_URL ""
 
 ## radius envs
 ENV AUTHORISATION_API_BASE_URL ""
@@ -45,10 +47,11 @@ ENV LOGGING_API_BASE_URL ""
 ENV RADIUSD_PARAMS ""
 
 CMD [ "/bin/sh", "-c", \
-      "wget $RADIUS_CONFIG_WHITELIST_URL -O /etc/raddb/clients.conf; \
-      wget ${CERT_STORE_URL}/ca.pem -O /etc/raddb/certs/ca.pem; \
-      wget ${CERT_STORE_URL}/comodoCA.pem -O /etc/raddb/certs/comodoCA.pem; \
-      wget ${CERT_STORE_URL}/server.key -O /etc/raddb/certs/server.key; \
-      wget ${CERT_STORE_URL}/server.pem -O /etc/raddb/certs/server.pem; \
+      "ENDPOINT_ARG=${ENDPOINT_URL:+--endpoint-url=$ENDPOINT_URL}; \
+      aws ${ENDPOINT_ARG} s3 cp ${WHITELIST_BUCKET}/clients.conf /etc/raddb/clients.conf; \
+      aws ${ENDPOINT_ARG} s3 cp ${CERT_STORE_BUCKET}/ca.pem /etc/raddb/certs/ca.pem; \
+      aws ${ENDPOINT_ARG} s3 cp ${CERT_STORE_BUCKET}/comodoCA.pem /etc/raddb/certs/comodoCA.pem; \
+      aws ${ENDPOINT_ARG} s3 cp ${CERT_STORE_BUCKET}/server.key /etc/raddb/certs/server.key; \
+      aws ${ENDPOINT_ARG} s3 cp ${CERT_STORE_BUCKET}/server.pem /etc/raddb/certs/server.pem; \
       bundle exec rackup -o 0.0.0.0 -p 3000 & /usr/sbin/radiusd $RADIUSD_PARAMS | cat" \
       ]
