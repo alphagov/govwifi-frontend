@@ -9,7 +9,7 @@
       		ca_file = ${certdir}/ca.pem
 			private_key_password = whatever
 			private_key_file = ${certdir}/server.key
-			dh_file = ${certdir}/dh
+			dh_file = ${raddbdir}/dh
 			random_file = /dev/urandom
 			check_crl = no
 			ca_path = ${cadir}
