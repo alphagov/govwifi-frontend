@@ -16,4 +16,4 @@ COPY healthcheck ./
 
 VOLUME /etc/raddb/certs
 EXPOSE 1812/udp 1813/udp 3000
-CMD bundle exec rackup -o 0.0.0.0 -p 3000 & /usr/sbin/radiusd ${RADIUSD_PARAMS:?Variable not set}
+CMD bundle exec rackup -o 0.0.0.0 -p 3000 & /usr/sbin/radiusd ${RADIUSD_PARAMS}
