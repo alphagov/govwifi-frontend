@@ -14,7 +14,7 @@ making changes to FreeRADIUS or the healthcheck service.
 Makefile targets are:
 
 - `make test` - Currently a no-op. Tests are located in the [acceptance-tests][acceptance-tests] repo
-- `make lint` - Runs linting on the healtcheck service, provided by `govuk-lint`
+- `make lint` - Runs linting on the healtcheck service, provided by `rubocop-govuk`
 
 ## How it pieces together
 

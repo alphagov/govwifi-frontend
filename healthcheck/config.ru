@@ -1,5 +1,7 @@
-require './app'
+# frozen_string_literal: true
 
-RACK_ENV = ENV['RACK_ENV'] ||= 'development'
+require "./app"
+
+RACK_ENV = ENV["RACK_ENV"] ||= "development"
 
 run App

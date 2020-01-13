@@ -27,7 +27,7 @@ test: test-healthcheck test-radius
 ## healthcheck related tasks
 
 lint-healthcheck: build
-	${RUN_APP} bundle exec govuk-lint-ruby
+	${RUN_APP} bundle exec rubocop
 
 test-healthcheck:
 	@echo "no healthcheck tests yet"

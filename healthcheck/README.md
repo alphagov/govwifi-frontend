@@ -18,11 +18,11 @@ All logs are sent to `STDOUT` which means, when running on EC2 instance, they wi
 
 ### Running the tests
 
-You can run the tests and linter with the following commands:
+You can run  linter with the following command:
 
 ```shell
-bundle exec rspec spec/
-bundle exec govwifi-ruby-lint
+cd ..
+make lint-healthcheck
 ```
 
 ### Serving the app locally
