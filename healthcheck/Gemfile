@@ -1,10 +1,12 @@
-source 'http://rubygems.org'
-ruby File.read('.ruby-version').chomp
+# frozen_string_literal: true
 
-gem 'puma'
-gem 'sinatra'
+source "http://rubygems.org"
+ruby File.read(".ruby-version").chomp
+
+gem "puma"
+gem "sinatra"
 
 group :test do
-  gem 'govuk-lint'
-  gem 'rspec'
+  gem "rspec"
+  gem "rubocop-govuk"
 end

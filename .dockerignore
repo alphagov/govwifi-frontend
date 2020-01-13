@@ -5,6 +5,8 @@
 # However we need to keep the ruby files
 !.ruby-version
 !**/.ruby-version
+!.rubocop.yml
+!**/.rubocop.yml
 
 # Avoid copying generated WPA config
 healthcheck/peap-mschapv2.conf

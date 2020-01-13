@@ -1,4 +1,6 @@
-require 'erb'
+# frozen_string_literal: true
+
+require "erb"
 
 class WpaConfig
   def initialize(template_path, ssid:, identity:, password:)
@@ -17,7 +19,7 @@ private
     erb = ERB.new(File.read(@template_path))
     erb.filename = @template_path
 
-    File.open(path, 'w+') do |f|
+    File.open(path, "w+") do |f|
       f.write(erb.result_with_hash(
                 ssid: ssid,
                 identity: identity,
