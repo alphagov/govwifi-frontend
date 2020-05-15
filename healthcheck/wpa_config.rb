@@ -24,7 +24,7 @@ private
                 ssid: ssid,
                 identity: identity,
                 password: password,
-        ))
+              ))
     end
   end
 end

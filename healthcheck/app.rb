@@ -7,14 +7,17 @@ require_relative "./wpa_config.rb"
 
 class App < Sinatra::Base
   configure do
-    set(:wpa_config, Proc.new {
-      WpaConfig.new(
-        File.join(root, "peap-mschapv2.conf.erb"),
-        ssid: ENV["HEALTH_CHECK_SSID"],
-        identity: ENV["HEALTH_CHECK_IDENTITY"],
-        password: ENV["HEALTH_CHECK_PASSWORD"],
-      )
-    })
+    set(
+      :wpa_config,
+      proc {
+        WpaConfig.new(
+          File.join(root, "peap-mschapv2.conf.erb"),
+          ssid: ENV["HEALTH_CHECK_SSID"],
+          identity: ENV["HEALTH_CHECK_IDENTITY"],
+          password: ENV["HEALTH_CHECK_PASSWORD"],
+        )
+      },
+    )
     set :healt_check_key, ENV["HEALTH_CHECK_RADIUS_KEY"]
   end
 
