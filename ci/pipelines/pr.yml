@@ -11,6 +11,8 @@ resource_types:
   type: registry-image
   source:
     repository: teliaoss/github-pr-resource
+    username: ((docker_hub_username))
+    password: ((docker_hub_authtoken))
 
 resources:
   - name: tech-ops
@@ -44,6 +46,8 @@ resources:
     source:
       repository: alpine
       tag: '3.8'
+      username: ((docker_hub_username))
+      password: ((docker_hub_authtoken))
 
 update-status-commands:
    update-status-base: &update-status-base
@@ -134,4 +138,3 @@ jobs:
     on_success:
       do:
         - <<: *update-status-success
-
