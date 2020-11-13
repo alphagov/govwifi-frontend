@@ -1,3 +1,6 @@
+# WARNING: We must pin the Alpine version to 3.8 because freeradius-rest (r6) package in alpine-3.9 contains
+# a regression breaking validation of rest authentication responses. Causes health checks to fail.
+# This is a known issue with FreeRadius: https://github.com/FreeRADIUS/freeradius-server/issues/2821
 FROM ruby:2.6.3-alpine3.8
 
 # Set up the radius configs
