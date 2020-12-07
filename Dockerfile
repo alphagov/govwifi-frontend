@@ -17,6 +17,11 @@ RUN bundle install $BUNDLE_ARGS \
  && apk del make gcc libc-dev
 COPY healthcheck ./
 
+# Add freeradius exporter
+RUN apk add libc6-compat
+COPY freeradius_exporter /usr/sbin/freeradius_exporter
+RUN chmod 755 /usr/sbin/freeradius_exporter
+
 VOLUME /etc/raddb/certs
-EXPOSE 1812/udp 1813/udp 3000
-CMD bundle exec rackup -o 0.0.0.0 -p 3000 & /usr/sbin/radiusd ${RADIUSD_PARAMS}
+EXPOSE 1812/udp 1813/udp 3000 9812
+CMD bundle exec rackup -o 0.0.0.0 -p 3000 & /usr/sbin/radiusd ${RADIUSD_PARAMS} & freeradius_exporter -web.listen-address 0.0.0.0:9812
