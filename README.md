@@ -16,9 +16,9 @@ Makefile targets are:
 - `make test` - Currently a no-op. Tests are located in the [acceptance-tests][acceptance-tests] repo
 - `make lint` - Runs linting on the healtcheck service, provided by `rubocop-govuk`
 
-## How it pieces together
+## Components
 
-This project has 2 main components; the RADIUS server, and the healthcheck service.
+This project has three main components: the RADIUS server, the [FreeRadius Prometheus Exporter][prometheus-exporter], and the healthcheck service.
 
 This RADIUS server is restarted daily by a separate app, the [Safe Restarter][safe-restarter].
 
@@ -27,6 +27,7 @@ This RADIUS server is restarted daily by a separate app, the [Safe Restarter][sa
 The healthcheck service acts as an adapter to a monitoring service (Route53 Healthchecks).
 When hit with a HTTP call, it will send a request to the radius server to ensure it can still
 authorise users.
+
 To accomplish this, [`eapol_test`][radius-testing] is used to simulate authentication using `PEAP-MSCHAPv2`.
 
 All code is located under the `healthcheck` directory.
@@ -59,10 +60,20 @@ Files are fetched once a night when the servers are restarted for updates.
 When someone attempts to use GovWifi:
 
 1.  The username and password is sent to the radius server
-2.  Radius recieves, and sends a request to the [authentication backend][auth-backend] to fetch the known password
+2.  Radius receives, and sends a request to the [authentication backend][auth-backend] to fetch the known password
 3.  The user password is checked against the known password
 4.  the login attempt is logged in the [logging backend][logging-backend]
 5.  either the user is accepted, or rejected depending on whether their password accepted.
+
+### FreeRadius Prometheus Exporter
+
+The [FreeRadius Prometheus Exporter][prometheus-exporter] is an open source Prometheus exporter for FreeRadius. 
+
+It uses the [FreeRadius Status Server][freeradius-status-server] to query information about server state and the packages being processed. The Status Server is enabled by adding the `status` configuration file to the `radius/sites-enabled` directory.
+
+The Prometheus exporter exposes these metrics on `/metrics` which can be then read by a Prometheus server.
+
+For more information see the project's [readme][prometheus-exporter]. For information about configuring the Status Server please see FreeRadius's [documentation][freeradius-status-server-config].
 
 ## How to contribute
 
@@ -82,3 +93,6 @@ When someone attempts to use GovWifi:
 [auth-backend]: https://github.com/alphagov/govwifi-authentication-api
 [logging-backend]: https://github.com/alphagov/govwifi-logging-api
 [safe-restarter]: https://github.com/alphagov/govwifi-safe-restarter 
+[prometheus-exporter]: https://github.com/bvantagelimited/freeradius_exporter
+[freeradius-status-server]: https://wiki.freeradius.org/config/Status
+[freeradius-status-server-config]: https://wiki.freeradius.org/config/Status#configuration
