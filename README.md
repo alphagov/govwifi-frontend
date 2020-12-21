@@ -18,7 +18,7 @@ Makefile targets are:
 
 ## Components
 
-This project has three main components: the RADIUS server, the [FreeRadius Prometheus Exporter][prometheus-exporter], and the healthcheck service.
+This project has three main components: the RADIUS server, the [FreeRADIUS Prometheus Exporter][prometheus-exporter], and the healthcheck service.
 
 This RADIUS server is restarted daily by a separate app, the [Safe Restarter][safe-restarter].
 
@@ -65,15 +65,15 @@ When someone attempts to use GovWifi:
 4.  the login attempt is logged in the [logging backend][logging-backend]
 5.  either the user is accepted, or rejected depending on whether their password accepted.
 
-### FreeRadius Prometheus Exporter
+### FreeRADIUS Prometheus Exporter
 
-The [FreeRadius Prometheus Exporter][prometheus-exporter] is an open source Prometheus exporter for FreeRadius. 
+The [FreeRADIUS Prometheus Exporter][prometheus-exporter] is an open source Prometheus exporter for FreeRADIUS. 
 
-It uses the [FreeRadius Status Server][freeradius-status-server] to query information about server state and the packages being processed. The Status Server is enabled by adding the `status` configuration file to the `radius/sites-enabled` directory.
+It uses the [FreeRADIUS Status Server][freeradius-status-server] to query information about server state and the packages being processed. The Status Server is enabled by adding the `status` configuration file to the `radius/sites-enabled` directory.
 
 The Prometheus exporter exposes these metrics on `/metrics` which can be then read by a Prometheus server.
 
-For more information see the project's [readme][prometheus-exporter]. For information about configuring the Status Server please see FreeRadius's [documentation][freeradius-status-server-config].
+For more information see the FreeRADIUS Prometheus Exporter's [readme][prometheus-exporter]. For information about configuring the Status Server please see FreeRadius's [documentation][freeradius-status-server-config].
 
 ## How to contribute
 
