@@ -73,7 +73,7 @@ It uses the [FreeRADIUS Status Server][freeradius-status-server] to query inform
 
 The Prometheus exporter exposes these metrics on `/metrics` which can be then read by a Prometheus server.
 
-For more information see the FreeRADIUS Prometheus Exporter's [readme][prometheus-exporter]. For information about configuring the Status Server please see FreeRadius's [documentation][freeradius-status-server-config].
+For more information see the FreeRADIUS Prometheus Exporter's [readme][prometheus-exporter]. For information about configuring the Status Server please see FreeRADIUS's [documentation][freeradius-status-server-config].
 
 ## How to contribute
 
