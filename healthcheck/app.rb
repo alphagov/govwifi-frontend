@@ -15,7 +15,7 @@ class App < Sinatra::Base
         ssid: ENV["HEALTH_CHECK_SSID"],
         identity: ENV["HEALTH_CHECK_IDENTITY"],
         password: ENV["HEALTH_CHECK_PASSWORD"],
-      )
+      ),
     )
     set :health_check_key, ENV["HEALTH_CHECK_RADIUS_KEY"]
   end
@@ -41,12 +41,12 @@ class App < Sinatra::Base
     result
   end
 
-  private
+private
 
-    def eapol_test(path)
-      health_check_key = settings.health_check_key
-      result = `eapol_test -r0 -t3 -c #{path} -a 127.0.0.1 -s #{health_check_key}`
-      last_result = result.split("\n").last
-      last_result == "SUCCESS" ? 200 : 500
-    end
+  def eapol_test(path)
+    health_check_key = settings.health_check_key
+    result = `eapol_test -r0 -t3 -c #{path} -a 127.0.0.1 -s #{health_check_key}`
+    last_result = result.split("\n").last
+    last_result == "SUCCESS" ? 200 : 500
+  end
 end

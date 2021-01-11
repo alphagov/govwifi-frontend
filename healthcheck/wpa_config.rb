@@ -25,10 +25,10 @@ private
     erb.filename = @template_path
 
     @file.write(erb.result_with_hash(
-      ssid: ssid,
-      identity: identity,
-      password: password,
-    ))
+                  ssid: ssid,
+                  identity: identity,
+                  password: password,
+                ))
     @file.rewind
   end
 end
