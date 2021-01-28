@@ -9,6 +9,11 @@ RUN apk --no-cache add wpa_supplicant freeradius freeradius-rest freeradius-eap 
  && openssl dhparam -out /etc/raddb/dh 1024
 COPY radius /etc/raddb
 
+# Add freeradius exporter
+RUN apk add libc6-compat
+COPY freeradius_exporter /usr/sbin/freeradius_exporter
+RUN chmod 755 /usr/sbin/freeradius_exporter
+
 # Install Ruby (for running the healthcheck service)
 RUN wget https://cache.ruby-lang.org/pub/ruby/2.7/ruby-2.7.2.tar.gz \
   && tar xzvf ruby-2.7.2.tar.gz \

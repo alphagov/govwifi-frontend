@@ -6,6 +6,7 @@ services:
       context: .
       args:
         BUNDLE_ARGS: "--no-cache --no-prune --jobs=8"
+        BASE_IMAGE: "788375279931.dkr.ecr.eu-west-2.amazonaws.com/govwifi/frontend-base:${TAG}"
     expose:
       - "3000"
       - "1812/udp"
