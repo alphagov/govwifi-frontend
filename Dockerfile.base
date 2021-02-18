@@ -1,7 +1,7 @@
 # WARNING: We must pin the Alpine version to 3.8 because freeradius-rest (r6) package in alpine-3.9 contains
 # a regression breaking validation of rest authentication responses. Causes health checks to fail.
 # This is a known issue with FreeRadius: https://github.com/FreeRADIUS/freeradius-server/issues/2821
-FROM alpine:3.8
+FROM alpine:3.13.2
 
 # Set up the radius configs. linux-headers and openssl-dev are needed for building Ruby.
 RUN apk --no-cache add wpa_supplicant freeradius freeradius-rest freeradius-eap openssl make gcc libc-dev linux-headers openssl-dev \
