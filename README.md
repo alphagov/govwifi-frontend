@@ -85,9 +85,9 @@ For more information see the FreeRADIUS Prometheus Exporter's [readme][prometheu
 
 ## License
 
-This codebase is released under [the MIT Licence][mit].
+This codebase is released under [the MIT License][mit].
                                                                 
-[mit]: LICENCE
+[mit]: LICENSE
 [govwifi]: https://www.gov.uk/government/publications/govwifi/govwifi
 [freeradius]: https://freeradius.org/
 [govwifi-build]: https://github.com/alphagov/govwifi-build
