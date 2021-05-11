@@ -27,7 +27,7 @@ rest {
     post-auth {
         uri = "${..logging_api_base_url}/logging/post-auth"
         method = 'post'
-        data = '{ "username": "%{User-Name}", "mac": "%{Calling-Station-ID}", "called_station_id": "%{Called-Station-ID}", "site_ip_address": "%{Client-IP-Address}", "cert_name": "%{TLS-Client-Cert-Common-Name}", "authentication_result": "%{reply:Packet-Type}" }'
+        data = '{ "username": "%{User-Name}", "mac": "%{Calling-Station-ID}", "called_station_id": "%{Called-Station-ID}", "site_ip_address": "%{Client-IP-Address}", "cert_name": "%{TLS-Client-Cert-Common-Name}", "authentication_result": "%{reply:Packet-Type}", "authentication_reply": "%{reply:Reply-Message}" }'
         body = 'json'
         tls = ${..tls}
     }

@@ -83,6 +83,11 @@ For more information see the FreeRADIUS Prometheus Exporter's [readme][prometheu
 4.  Run the [acceptance tests][acceptance-tests]
 5.  Raise a pull request
 
+## License
+
+This codebase is released under [the MIT License][mit].
+                                                                
+[mit]: LICENSE
 [govwifi]: https://www.gov.uk/government/publications/govwifi/govwifi
 [freeradius]: https://freeradius.org/
 [govwifi-build]: https://github.com/alphagov/govwifi-build

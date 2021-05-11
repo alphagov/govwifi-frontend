@@ -101,7 +101,7 @@ jobs:
     # force people to use new git commits to rerun PRs
     disable_manual_trigger: true
     plan:
-      - aggregate:
+      - in_parallel:
         - do:
           - get: src
             resource: pull-request
@@ -122,7 +122,7 @@ jobs:
         image: runner
         file: src/ci/tasks/pre-build.yml
 
-      - aggregate:
+      - in_parallel:
         - task: lint
           privileged: true
           image: runner
