@@ -3,7 +3,7 @@
 require "sinatra/base"
 require "logger"
 
-require_relative "./wpa_config.rb"
+require_relative "./wpa_config"
 
 class App < Sinatra::Base
   configure do
