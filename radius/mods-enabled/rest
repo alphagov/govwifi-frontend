@@ -8,7 +8,6 @@ rest {
 
     authorisation_api_base_url = "$ENV{AUTHORISATION_API_BASE_URL}"
     logging_api_base_url = "$ENV{LOGGING_API_BASE_URL}"
-    task_id = "$ENV{TASK_ID}"
 
     authorize {
         uri = "${..authorisation_api_base_url}/authorize/user/%{User-Name}/mac/%{Calling-Station-ID}/ap/%{Called-Station-ID}/site/%{Client-IP-Address}/apg/%{Aruba-AP-Group}/mdn/%{Meraki-Device-Name}"
@@ -28,7 +27,7 @@ rest {
     post-auth {
         uri = "${..logging_api_base_url}/logging/post-auth"
         method = 'post'
-        data = '{ "username": "%{User-Name}", "mac": "%{Calling-Station-ID}", "called_station_id": "%{Called-Station-ID}", "site_ip_address": "%{Client-IP-Address}", "cert_name": "%{TLS-Client-Cert-Common-Name}", "authentication_result": "%{reply:Packet-Type}", "authentication_reply": "%{reply:Reply-Message}", "task_id": "${..task_id}" }'
+        data = '{ "username": "%{User-Name}", "mac": "%{Calling-Station-ID}", "called_station_id": "%{Called-Station-ID}", "site_ip_address": "%{Client-IP-Address}", "cert_name": "%{TLS-Client-Cert-Common-Name}", "authentication_result": "%{reply:Packet-Type}", "authentication_reply": "%{reply:Reply-Message}", "task_id": "$ENV{TASK_ID}" }'
         body = 'json'
         tls = ${..tls}
     }
