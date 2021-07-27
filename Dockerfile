@@ -8,6 +8,7 @@ RUN apk --no-cache add wpa_supplicant freeradius freeradius-rest freeradius-eap 
  && mkdir -p /tmp/radiusd /etc/raddb \
  && openssl dhparam -out /etc/raddb/dh 1024
 COPY radius /etc/raddb
+COPY ci/tasks/scripts/run.sh /usr/bin
 
 # Set up the healtcheck service
 ARG BUNDLE_ARGS="--deployment --no-cache --no-prune --jobs=8 --without test"
@@ -24,4 +25,4 @@ RUN chmod 755 /usr/sbin/freeradius_exporter
 
 VOLUME /etc/raddb/certs
 EXPOSE 1812/udp 1813/udp 3000 9812
-CMD bundle exec rackup -o 0.0.0.0 -p 3000 & /usr/sbin/radiusd ${RADIUSD_PARAMS} & freeradius_exporter -web.listen-address 0.0.0.0:9812
+CMD /usr/bin/run.sh
