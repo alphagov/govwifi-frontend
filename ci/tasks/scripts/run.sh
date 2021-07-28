@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if [ -n "${ECS_CONTAINER_METADATA_URI}" ]; then
-  export TASK_ID=$(curl $ECS_CONTAINER_METADATA_URI | jq '.Labels ."com.amazonaws.ecs.task-arn"')
+  export TASK_ID=$(curl $ECS_CONTAINER_METADATA_URI | jq -r '.Labels ."com.amazonaws.ecs.task-arn"')
 fi
 
 bundle exec rackup -o 0.0.0.0 -p 3000 &
