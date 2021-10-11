@@ -19,9 +19,13 @@ RUN bundle install $BUNDLE_ARGS \
 COPY healthcheck ./
 
 # Add freeradius exporter
-RUN apk add libc6-compat
-COPY freeradius_exporter /usr/sbin/freeradius_exporter
-RUN chmod 755 /usr/sbin/freeradius_exporter
+RUN curl https://github.com/bvantagelimited/freeradius_exporter/releases/download/0.1.3/freeradius_exporter-0.1.3-amd64.tar.gz --location --output freeradius_exporter.tar.gz \
+ && echo "151d5f8aa5e3084ebe315fd7ff5377d555ad12fa6a61180d9abd98d49e8cc342  freeradius_exporter.tar.gz" > checksums \
+ && sha256sum -c checksums \
+ && rm checksums \
+ && tar -xzvf freeradius_exporter.tar.gz --strip-components=1 freeradius_exporter-0.1.3-amd64/freeradius_exporter \
+ && mv freeradius_exporter /usr/sbin/freeradius_exporter \
+ && chmod 755 /usr/sbin/freeradius_exporter
 
 VOLUME /etc/raddb/certs
 EXPOSE 1812/udp 1813/udp 3000 9812
