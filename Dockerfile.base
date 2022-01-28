@@ -1,4 +1,4 @@
-FROM ruby:3.0.3-alpine
+FROM FROM ruby:3.0.3-alpine
 
 # Set up the radius configs. linux-headers and openssl-dev are needed for building Ruby.
 RUN apk --no-cache add wpa_supplicant freeradius freeradius-rest freeradius-eap openssl make gcc libc-dev linux-headers openssl-dev \
