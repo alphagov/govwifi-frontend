@@ -5,8 +5,9 @@
 		cisco_accounting_username_bug = no
 		max_sessions = 4096
 		tls {
+			tls_min_version = "1.0"
 			certificate_file = ${certdir}/server.pem
-      		ca_file = ${certdir}/ca.pem
+			ca_file = ${certdir}/ca.pem
 			private_key_password = whatever
 			private_key_file = ${certdir}/server.key
 			dh_file = ${raddbdir}/dh
@@ -17,9 +18,9 @@
 			ecdh_curve = "prime256v1"
 
 			cache {
-			      enable = no
-			      lifetime = 24
-			      max_entries = 255
+				enable = no
+				lifetime = 24
+				max_entries = 255
 			}
 
 			verify {
