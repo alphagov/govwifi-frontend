@@ -4,7 +4,7 @@
 FROM ruby:2.6.3-alpine3.8
 
 # Set up the radius configs
-RUN apk --no-cache add wpa_supplicant freeradius freeradius-rest freeradius-eap openssl make gcc libc-dev curl jq \
+RUN apk --no-cache add wpa_supplicant freeradius~=3.0.17 freeradius-rest freeradius-eap openssl make gcc libc-dev curl jq \
  && mkdir -p /tmp/radiusd /etc/raddb \
  && openssl dhparam -out /etc/raddb/dh 1024
 COPY radius /etc/raddb
