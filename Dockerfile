@@ -1,10 +1,7 @@
-# WARNING: We must pin the Alpine version to 3.8 because freeradius-rest (r6) package in alpine-3.9 contains
-# a regression breaking validation of rest authentication responses. Causes health checks to fail.
-# This is a known issue with FreeRadius: https://github.com/FreeRADIUS/freeradius-server/issues/2821
-FROM ruby:2.6.3-alpine3.8
+FROM ruby:3.0.3-alpine3.15
 
 # Set up the radius configs
-RUN apk --no-cache add wpa_supplicant freeradius~=3.0.17 freeradius-rest freeradius-eap openssl make gcc libc-dev curl jq \
+RUN apk --no-cache add wpa_supplicant freeradius~=3.0.25 freeradius-rest freeradius-eap openssl make gcc libc-dev curl jq \
  && mkdir -p /tmp/radiusd /etc/raddb \
  && openssl dhparam -out /etc/raddb/dh 1024
 COPY radius /etc/raddb
