@@ -1,4 +1,4 @@
-FROM ruby:3.0.3-alpine3.15
+FROM ruby:3.1.2-alpine3.15
 
 # Set up the radius configs
 RUN apk --no-cache add wpa_supplicant freeradius~=3.0.25 freeradius-rest freeradius-eap openssl make gcc libc-dev curl jq \
