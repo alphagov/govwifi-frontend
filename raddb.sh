@@ -1,4 +1,4 @@
-#!/usr/bin/env ash
+#!/usr/bin/env ash -x
 
 set -o nounset -o errexit
 
