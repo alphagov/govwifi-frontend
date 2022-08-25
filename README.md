@@ -24,11 +24,11 @@ This RADIUS server is restarted daily by a separate app, the [Safe Restarter][sa
 
 ### Healthcheck
 
-The healthcheck service acts as an adapter to a monitoring service (Route53 Healthchecks).
-When hit with a HTTP call, it will send a request to the radius server to ensure it can still
-authorise users.
+When hit with a HTTP call, the healthcheck service will test the
+radius server to ensure it can still authorise users.
 
-To accomplish this, [`eapol_test`][radius-testing] is used to simulate authentication using `PEAP-MSCHAPv2`.
+To accomplish this, [`eapol_test`][radius-testing] is used to simulate
+authentication using `PEAP-MSCHAPv2`.
 
 All code is located under the `healthcheck` directory.
 
