@@ -24,11 +24,11 @@ This RADIUS server is restarted daily by a separate app, the [Safe Restarter][sa
 
 ### Healthcheck
 
-The healthcheck service acts as an adapter to a monitoring service (Route53 Healthchecks).
-When hit with a HTTP call, it will send a request to the radius server to ensure it can still
-authorise users.
+When hit with a HTTP call, the healthcheck service will test the
+radius server to ensure it can still authorise users.
 
-To accomplish this, [`eapol_test`][radius-testing] is used to simulate authentication using `PEAP-MSCHAPv2`.
+To accomplish this, [`eapol_test`][radius-testing] is used to simulate
+authentication using `PEAP-MSCHAPv2`.
 
 All code is located under the `healthcheck` directory.
 
@@ -67,7 +67,7 @@ When someone attempts to use GovWifi:
 
 ### FreeRADIUS Prometheus Exporter
 
-The [FreeRADIUS Prometheus Exporter][prometheus-exporter] is an open source Prometheus exporter for FreeRADIUS. 
+The [FreeRADIUS Prometheus Exporter][prometheus-exporter] is an open source Prometheus exporter for FreeRADIUS.
 
 It uses the [FreeRADIUS Status Server][freeradius-status-server] to query information about server state and the packages being processed. The Status Server is enabled by adding the `status` configuration file to the `radius/sites-enabled` directory.
 
@@ -86,7 +86,7 @@ For more information see the FreeRADIUS Prometheus Exporter's [readme][prometheu
 ## License
 
 This codebase is released under [the MIT License][mit].
-                                                                
+
 [mit]: LICENSE
 [govwifi]: https://www.gov.uk/government/publications/govwifi/govwifi
 [freeradius]: https://freeradius.org/
@@ -97,7 +97,7 @@ This codebase is released under [the MIT License][mit].
 [freeradius-clients]: https://github.com/FreeRADIUS/freeradius-server/blob/v3.0.x/raddb/clients.conf
 [auth-backend]: https://github.com/alphagov/govwifi-authentication-api
 [logging-backend]: https://github.com/alphagov/govwifi-logging-api
-[safe-restarter]: https://github.com/alphagov/govwifi-safe-restarter 
+[safe-restarter]: https://github.com/alphagov/govwifi-safe-restarter
 [prometheus-exporter]: https://github.com/bvantagelimited/freeradius_exporter
 [freeradius-status-server]: https://wiki.freeradius.org/config/Status
 [freeradius-status-server-config]: https://wiki.freeradius.org/config/Status#configuration
