@@ -1,0 +1,28 @@
+version: 0.2
+phases:
+    pre_build:
+        commands:
+            - echo "AWS_REGION is $AWS_REGION "
+            - REPOSITORY_URI_RADDB="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/govwifi/$STAGE/raddb"
+            - echo "REPOSITORY_URI_RADDB is $REPOSITORY_URI_RADDB"
+            - REPOSITORY_URI_FE="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/govwifi/$STAGE/frontend"
+            - echo "REPOSITORY_URI_FE is $REPOSITORY_URI_FE"
+            - echo "$DOCKER_HUB_AUTHTOKEN_ENV" | docker login -u $(echo $DOCKER_HUB_USERNAME_ENV) --password-stdin
+            - IMAGE_TAG="latest"
+
+    build:
+        commands:
+            - echo Build started on `date`
+            - echo "Building raddb Docker image..."
+            - docker build -t $REPOSITORY_URI_RADDB:$IMAGE_TAG -f Dockerfile.raddb .
+            - echo "Building frontend Docker image..."
+            - docker build -t $REPOSITORY_URI_FE:$IMAGE_TAG -f Dockerfile .
+    post_build:
+        commands:
+            - echo "Pushing the Docker images..."
+            - echo "Logging into AWS ECR"
+            - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+            - echo "Pushing raddb image"
+            - docker push $REPOSITORY_URI_RADDB:$IMAGE_TAG
+            - echo "Pushing frontend image"
+            - docker push $REPOSITORY_URI_FE:$IMAGE_TAG
