@@ -5,24 +5,48 @@ phases:
             - echo "AWS_REGION is $AWS_REGION "
             - REPOSITORY_URI_RADDB="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/govwifi/$STAGE/raddb"
             - echo "REPOSITORY_URI_RADDB is $REPOSITORY_URI_RADDB"
+
+            - REPOSITORY_URI_RADDB_IRE="$AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com/govwifi/$STAGE/raddb"
+            - echo "REPOSITORY_URI_RADDB_IRE is $REPOSITORY_URI_RADDB_IRE"
+
             - REPOSITORY_URI_FE="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/govwifi/$STAGE/frontend"
             - echo "REPOSITORY_URI_FE is $REPOSITORY_URI_FE"
+
+            - REPOSITORY_URI_FE_IRE="$AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com/govwifi/$STAGE/frontend"
+            - echo "REPOSITORY_URI_FE_IRE is $REPOSITORY_URI_FE_IRE"
+
             - echo "$DOCKER_HUB_AUTHTOKEN_ENV" | docker login -u $(echo $DOCKER_HUB_USERNAME_ENV) --password-stdin
             - IMAGE_TAG="latest"
 
     build:
         commands:
             - echo Build started on `date`
-            - echo "Building raddb Docker image..."
+            - echo "Building raddb Docker images..."
+
             - docker build -t $REPOSITORY_URI_RADDB:$IMAGE_TAG -f Dockerfile.raddb .
             - echo "Building frontend Docker image..."
             - docker build -t $REPOSITORY_URI_FE:$IMAGE_TAG -f Dockerfile .
+
+            - docker build -t $REPOSITORY_URI_RADDB_IRE:$IMAGE_TAG -f Dockerfile.raddb .
+            - echo "Building frontend Docker image..."
+            - docker build -t $REPOSITORY_URI_FE_IRE:$IMAGE_TAG -f Dockerfile .
     post_build:
         commands:
             - echo "Pushing the Docker images..."
-            - echo "Logging into AWS ECR"
+            - echo "Logging into AWS ECR eu-west-2"
             - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
-            - echo "Pushing raddb image"
+
+            - echo "Pushing raddb image eu-west-2"
             - docker push $REPOSITORY_URI_RADDB:$IMAGE_TAG
-            - echo "Pushing frontend image"
+
+            - echo "Pushing frontend image eu-west-2"
             - docker push $REPOSITORY_URI_FE:$IMAGE_TAG
+
+            - echo "Logging into AWS ECR eu-west-1"
+            - aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.eu-west-1.amazonaws.com
+
+            - echo "Pushing raddb image to eu-west-1"
+            - docker push $REPOSITORY_URI_RADDB_IRE:$IMAGE_TAG
+
+            - echo "Pushing frontend image to eu-west-1"
+            - docker push $REPOSITORY_URI_FE_IRE:$IMAGE_TAG
