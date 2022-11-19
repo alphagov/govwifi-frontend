@@ -7,7 +7,6 @@ RUN apk --no-cache add wpa_supplicant freeradius~=3.0.25 freeradius-rest freerad
     && openssl dhparam -out /etc/raddb/dh 1024
 COPY radius /etc/raddb
 
-
 # Add freeradius exporter
 RUN curl https://github.com/bvantagelimited/freeradius_exporter/releases/download/0.1.3/freeradius_exporter-0.1.3-amd64.tar.gz --location --output freeradius_exporter.tar.gz \
  && echo "151d5f8aa5e3084ebe315fd7ff5377d555ad12fa6a61180d9abd98d49e8cc342  freeradius_exporter.tar.gz" > checksums \
@@ -24,11 +23,15 @@ RUN chmod 755 /usr/bin/*.sh
 
 COPY api-stubs /api-stubs
 WORKDIR /api-stubs
-RUN bundle install
+RUN bundle install $BUNDLE_ARGS
+
+COPY test-app /test-app
+WORKDIR /test-app
+RUN bundle install $BUNDLE_ARGS
 
 COPY healthcheck /healthcheck
 WORKDIR /healthcheck
-RUN bundle install
+RUN bundle install $BUNDLE_ARGS
 
 RUN apk del make gcc libc-dev
 
