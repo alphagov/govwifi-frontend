@@ -29,7 +29,7 @@ done
 
 echo "start radius server"
 cd /healthcheck && bundle exec rackup -o 0.0.0.0 -p 3000 &
-/usr/sbin/radiusd -X &
+/usr/local/sbin/radiusd -X &
 while [ $(curl --write-out '%{http_code}' --silent --output /dev/null 127.0.0.1:3000) -ne 200 ]
 do
   echo -n .
