@@ -7,6 +7,7 @@ require_relative "./wpa_config"
 
 class App < Sinatra::Base
   configure do
+    set :port, 3000
     set :wpa_config_template, File.join(root, "peap-mschapv2.conf.erb")
     set(
       :wpa_config,

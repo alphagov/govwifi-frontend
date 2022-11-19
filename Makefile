@@ -1,58 +1,19 @@
-
-
-DOCKER_COMPOSE = docker-compose -f docker-compose.yml
-
-ifdef ON_CONCOURSE
-  DOCKER_COMPOSE += -f docker-compose.concourse.yml
+ifeq ($(shell uname -m) ,arm64)
+	DOCKER_FLAGS += --platform linux/amd64
 endif
 
-ifndef ON_CONCOURSE
-	DOCKER_COMPOSE += -f docker-compose.development.yml
-endif
+test:
+	@echo "No tests"
 
-RUN_APP = ${DOCKER_COMPOSE} run --rm app
-RUN_APP_PORTS = ${DOCKER_COMPOSE} run --rm --service-ports app
+lint: build
+	docker run $(DOCKER_FLAGS) --rm -v=$(CURDIR)/radius:/etc/raddb -v=$(CURDIR)/radius/certs:/etc/raddb/certs -p 1812-1813:1812-1813/udp -p 3000:3000 -p 9812:9812 govwifi-frontend /bin/sh -c "cd /healthcheck && bundle exec rubocop -d"
 
+build: FORCE
+	docker build $(DOCKER_FLAGS) -t govwifi-frontend .
 
-build: docker-build
+serve: build FORCE
+	# Declare the /etc/radius/certs mount explicity, despite being a subdir of /etc/radius because it is declared
+	# as a volume in the Dockerfile
+	docker run $(DOCKER_FLAGS) --rm -it -v=$(CURDIR)/radius:/etc/raddb -v=$(CURDIR)/radius/certs:/etc/raddb/certs -p 1812-1813:1812-1813/udp -p 3000:3000 -p 9812:9812 --name govwifi-frontend-c govwifi-frontend /usr/bin/run-local.sh
 
-prebuild: docker-prebuild
-
-lint: lint-healthcheck lint-radius
-
-test: test-healthcheck test-radius
-
-.PHONY: build prebuild lint test
-
-## healthcheck related tasks
-
-lint-healthcheck: build
-	${RUN_APP} bundle exec rubocop
-
-test-healthcheck:
-	@echo "no healthcheck tests yet"
-
-.PHONY: lint-healthcheck test-healthcheck
-
-## Radius related tasks
-
-lint-radius:
-	@echo "no radius linting yet"
-
-test-radius:
-	@echo "no radius tests yet"
-
-.PHONY: lint-radius test-radius
-
-## Docker specific tasks
-
-docker-build:
-ifndef ON_CONCOURSE
-	${DOCKER_COMPOSE} build
-endif
-
-docker-prebuild:
-	${DOCKER_COMPOSE} build
-	${DOCKER_COMPOSE} up --no-start
-
-.PHONY: docker-build docker-prebuild
+FORCE:

@@ -1,0 +1,15 @@
+# frozen_string_literal: true
+
+source "http://rubygems.org"
+ruby File.read(".ruby-version").chomp
+
+gem "puma"
+gem "sqlite3"
+gem "sequel"
+gem "sinatra"
+gem "rspec"
+gem "rack-test"
+
+group :test do
+  gem "rubocop-govuk"
+end
