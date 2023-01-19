@@ -18,6 +18,29 @@ phases:
             - echo "$DOCKER_HUB_AUTHTOKEN_ENV" | docker login -u $(echo $DOCKER_HUB_USERNAME_ENV) --password-stdin
             - IMAGE_TAG="latest"
 
+            - echo "Acceptance tests project name is $ACCEPTANCE_TESTS_PROJECT_NAME"
+            - BUILD_ID=$(aws codebuild start-build --project-name $ACCEPTANCE_TESTS_PROJECT_NAME | jq -r '.build.id')
+            - echo "Acceptance tests have started. BUILD_ID is $BUILD_ID"
+            - BUILD_STATUS=$(aws codebuild batch-get-builds --ids $BUILD_ID | jq -r '.builds[].buildStatus')
+            - echo "Build status is $BUILD_STATUS"
+            - |
+              while [ $BUILD_STATUS = "IN_PROGRESS" ] ; do
+                  echo "Build status is $BUILD_STATUS"
+                  BUILD_STATUS=$(aws codebuild batch-get-builds --ids $BUILD_ID | jq -r '.builds[].buildStatus')
+                  if [ $BUILD_STATUS = "FAILED" ]
+                  then
+                    echo "Frontend acceptance tests have failed. Please inspect them $BUILD_ID"
+                    exit 1;
+                    break
+                  elif [ $BUILD_STATUS = "SUCCEEDED" ]
+                  then
+                    echo "Acceptance tests successful."
+                    break
+                  fi
+                  echo "Acceptance tests status is $BUILD_STATUS"
+                  sleep 30s
+                done
+
     build:
         commands:
             - echo Build started on `date`
