@@ -1,9 +1,10 @@
 FROM ruby:3.1.2-alpine3.15
 
 # Set up the radius configs
-RUN apk --no-cache add wpa_supplicant freeradius~=3.0.25 freeradius-rest freeradius-eap freeradius-radclient libxml2 sqlite-libs sqlite sqlite-dev openssl make gcc libc-dev curl jq python3 py3-pip \
- && mkdir -p /tmp/radiusd /etc/raddb \
- && openssl dhparam -out /etc/raddb/dh 1024
+RUN apk --no-cache add wpa_supplicant freeradius~=3.0.25 freeradius-rest freeradius-eap freeradius-radclient libxml2 \
+    sqlite-libs sqlite sqlite-dev openssl make gcc libc-dev curl jq python3 py3-pip net-tools tmux \
+    && mkdir -p /tmp/radiusd /etc/raddb \
+    && openssl dhparam -out /etc/raddb/dh 1024
 COPY radius /etc/raddb
 
 
