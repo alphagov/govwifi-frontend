@@ -1,4 +1,4 @@
-FROM ruby:3.1.2-alpine3.15
+FROM ruby:3.2.1-alpine3.17
 
 RUN apk --update --no-cache add wpa_supplicant openssl make gcc libc-dev curl talloc-dev jq g++ zlib-dev \
                                 openssl-dev linux-headers python3 py3-pip net-tools tmux sqlite-libs sqlite \
@@ -32,15 +32,15 @@ RUN chmod 755 /usr/bin/*.sh
 
 COPY api-stubs /api-stubs
 WORKDIR /api-stubs
-RUN bundle install $BUNDLE_ARGS
+RUN bundle install
 
 COPY test-app /test-app
 WORKDIR /test-app
-RUN bundle install $BUNDLE_ARGS
+RUN bundle install
 
 COPY healthcheck /healthcheck
 WORKDIR /healthcheck
-RUN bundle install $BUNDLE_ARGS
+RUN bundle install
 
 VOLUME /etc/raddb/certs
 EXPOSE 1812/udp 1813/udp 3000 9812
