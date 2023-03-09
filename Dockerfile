@@ -27,7 +27,7 @@ RUN curl https://github.com/bvantagelimited/freeradius_exporter/releases/downloa
 
 RUN pip3 install watchdog==2.1.9
 COPY config_watch.py /usr/bin
-COPY ci/tasks/scripts/run*.sh ci/tasks/scripts/db_utils.sh ci/tasks/scripts/vars.sh /usr/bin/
+COPY scripts/run*.sh scripts/db_utils.sh scripts/vars.sh /usr/bin/
 RUN chmod 755 /usr/bin/*.sh
 
 COPY api-stubs /api-stubs
