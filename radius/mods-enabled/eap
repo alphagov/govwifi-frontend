@@ -14,7 +14,7 @@
 			random_file = /dev/urandom
 			check_crl = no
 			ca_path = ${cadir}
-			cipher_list = "DEFAULT"
+			cipher_list = "DEFAULT@SECLEVEL=0"
 			ecdh_curve = "prime256v1"
 
 			cache {
