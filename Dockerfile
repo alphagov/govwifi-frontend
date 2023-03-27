@@ -1,8 +1,9 @@
 FROM ruby:3.2.1-alpine3.17
 
 RUN apk --update --no-cache add wpa_supplicant openssl make gcc libc-dev curl talloc-dev jq g++ zlib-dev \
-                                openssl-dev linux-headers python3 py3-pip net-tools tmux sqlite-libs sqlite \
-                                sqlite-dev libxml2 curl-dev json-c-dev libmemcached-dev mariadb-connector-c-dev
+                                openssl-dev linux-headers python3 py3-pip py3-wheel net-tools tmux sqlite-libs \
+                                sqlite sqlite-dev libxml2 curl-dev json-c-dev libmemcached-dev \
+                                mariadb-connector-c-dev
 
 RUN wget https://github.com/FreeRADIUS/freeradius-server/releases/download/release_3_2_2/freeradius-server-3.2.2.tar.gz \
     && tar xzvf freeradius-server-3.2.2.tar.gz \

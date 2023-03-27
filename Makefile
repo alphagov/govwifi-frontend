@@ -9,7 +9,7 @@ lint: build
 	docker run $(DOCKER_FLAGS) --rm -v=$(CURDIR)/radius:/etc/raddb -v=$(CURDIR)/radius/certs:/etc/raddb/certs -p 1812-1813:1812-1813/udp -p 3000:3000 -p 9812:9812 govwifi-frontend /bin/sh -c "cd /healthcheck && bundle exec rubocop -d"
 
 build: FORCE
-	docker build $(DOCKER_FLAGS) -t govwifi-frontend .
+	docker build --progress=plain $(DOCKER_FLAGS) -t govwifi-frontend .
 
 serve: build FORCE
 	# Declare the /etc/radius/certs mount explicity, despite being a subdir of /etc/radius because it is declared
