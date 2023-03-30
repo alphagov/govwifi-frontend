@@ -1,5 +1,7 @@
 #!/bin/sh
 
+c_rehash /etc/raddb/certs/trusted_certificates
+
 source /usr/bin/db_utils.sh
 source /usr/bin/vars.sh
 
