@@ -14,6 +14,6 @@ build: FORCE
 serve: build FORCE
 	# Declare the /etc/radius/certs mount explicity, despite being a subdir of /etc/radius because it is declared
 	# as a volume in the Dockerfile and this prevents it being covered by the parent bind mount
-	docker run $(DOCKER_FLAGS) --rm -it -v=$(CURDIR)/radius:/etc/raddb -v=$(CURDIR)/radius/certs:/etc/raddb/certs -p 1812-1813:1812-1813/udp -p 3000:3000 -p 9812:9812 --name govwifi-frontend-c govwifi-frontend /usr/bin/run-local.sh
+	docker run $(DOCKER_FLAGS) --rm -it -v=$(CURDIR)/health-check:/health-check -v=$(CURDIR)/test-app:/test-app -v=$(CURDIR)/api-stubs:/api-stubs -v=$(CURDIR)/radius:/etc/raddb -v=$(CURDIR)/radius/certs:/etc/raddb/certs -p 1812-1813:1812-1813/udp -p 3000:3000 -p 9812:9812 --name govwifi-frontend-c govwifi-frontend /usr/bin/run-local.sh
 
 FORCE:
