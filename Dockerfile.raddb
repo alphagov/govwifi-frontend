@@ -1,11 +1,12 @@
-FROM python:3-alpine
+FROM python:3.11-alpine
+
 VOLUME /etc/raddb/certs
-RUN wget "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" \
- && unzip awscli-bundle.zip \
- && rm awscli-bundle.zip \
- && ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws \
- && rm -r ./awscli-bundle
+
+RUN pip install awscli --upgrade
+
+COPY scripts/split_pem.py /split_pem.py
 COPY raddb.sh /raddb.sh
 RUN chmod +x /raddb.sh
+
 ENTRYPOINT ["/raddb.sh"]
 CMD [ "date" ]
