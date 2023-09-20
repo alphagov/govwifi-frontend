@@ -2,6 +2,9 @@ ifeq ($(shell uname -m) ,arm64)
 	DOCKER_FLAGS += --platform linux/amd64
 endif
 
+CERT_STORE_BUCKET = s3://frontend-cert-london-20211215162809563100000001
+ALLOWLIST_BUCKET = s3://govwifi-staging-admin
+
 TEST_APP_PATH = $(CURDIR)/test-app
 CERTIFICATE_PATH = $(TEST_APP_PATH)/spec/fixtures/certificates
 TRUSTED_CERTIFICATES_PATH = $(TEST_APP_PATH)/spec/fixtures/trusted_certificates
@@ -60,3 +63,10 @@ copy_certs: create_certs
 
 rehash_certs:
 	c_rehash $(TRUSTED_CERTIFICATES_PATH)
+
+logon_aws_staging:
+	gds aws govwifi-staging -s
+
+build_cert_volume:
+	docker build $(DOCKER_FLAGS) -f Dockerfile.raddb -t raddb-certs-image .
+	docker run $(DOCKER_FLAGS) --rm -it -e AWS_REGION==$(AWS_REGION) -e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) -e AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) -e AWS_SESSION_TOKEN=$(AWS_SESSION_TOKEN) -e CERT_STORE_BUCKET=$(CERT_STORE_BUCKET) -e ALLOWLIST_BUCKET=$(ALLOWLIST_BUCKET) -v ~/.aws:/root/.aws --name govwifi-raddb-certs raddb-certs-image /bin/sh
