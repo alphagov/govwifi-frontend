@@ -13,7 +13,7 @@
 			dh_file = ${raddbdir}/dh
 			random_file = /dev/urandom
 			check_crl = no
-			ca_path = ${cadir}
+			ca_path = ${certdir}/trusted_certificates
 			cipher_list = "DEFAULT@SECLEVEL=0"
 			ecdh_curve = "prime256v1"
 
@@ -25,7 +25,7 @@
 
 			verify {
 				tmpdir = /tmp/radiusd
-				client = "/usr/bin/openssl verify -CAfile ${certdir}/ca.pem %{TLS-Client-Cert-Filename}"
+				client = "/usr/bin/openssl verify -CApath ${certdir}/trusted_certificates %{TLS-Client-Cert-Filename}"
 			}
 
 			ocsp {
@@ -36,6 +36,8 @@
 
 			staple {
 			}
+			#This may have to be set to 'yes' in future
+			reject_unknown_intermediate_ca = no
 		}
 
 		ttls {

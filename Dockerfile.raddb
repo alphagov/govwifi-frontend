@@ -1,7 +1,12 @@
-FROM python:3-alpine
+FROM python:3.11-alpine
+
 VOLUME /etc/raddb/certs
-RUN apk add --no-cache aws-cli 
+
+RUN pip install awscli --upgrade
+
+COPY scripts/split_pem.py /split_pem.py
 COPY raddb.sh /raddb.sh
 RUN chmod +x /raddb.sh
+
 ENTRYPOINT ["/raddb.sh"]
 CMD [ "date" ]
