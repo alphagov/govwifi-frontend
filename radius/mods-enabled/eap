@@ -7,10 +7,8 @@
 		tls {
 			tls_min_version = "1.0"
 			certificate_file = ${certdir}/server.pem
-			ca_file = ${certdir}/ca.pem
 			private_key_password = whatever
 			private_key_file = ${certdir}/server.key
-			dh_file = ${raddbdir}/dh
 			random_file = /dev/urandom
 			check_crl = no
 			ca_path = ${certdir}/trusted_certificates
