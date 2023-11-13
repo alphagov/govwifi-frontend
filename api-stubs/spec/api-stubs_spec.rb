@@ -30,7 +30,7 @@ RSpec.describe ApiStub do
       let(:values) {
         { username: "john", mac: "aaa", called_station_id: "bbb", site_ip_address: "ccc",
           cert_name: "ddd", authentication_result: "eee", "Access-Accept" => "fff",
-          authentication_reply: "ggg", task_id: "hhh" }
+          authentication_reply: "ggg", task_id: "hhh", cert_serial: "iii", cert_subject: "jjj", cert_issuer: "kkk" }
       }
       let(:body) {
         values.to_json
