@@ -46,11 +46,6 @@ create_certs:
 	openssl req -newkey 4096 -keyout $(CERTIFICATE_PATH)/alt_client.key -outform pem -keyform pem -out $(CERTIFICATE_PATH)/alt_client.req -nodes -subj '/CN=Alternate Client'
 	openssl x509 -req -CA $(CERTIFICATE_PATH)/alt_intermediate_ca.pem -CAkey $(CERTIFICATE_PATH)/alt_intermediate_ca.key -in $(CERTIFICATE_PATH)/alt_client.req -out $(CERTIFICATE_PATH)/alt_client.pem -extensions v3_client -days 365 -CAcreateserial -extfile $(TEST_APP_PATH)/openssl.conf -CAserial $(CERTIFICATE_PATH)/alt_client.srl
 	
-	# openssl req -newkey 4096 -keyout $(CERTIFICATE_PATH)/separate_intermediate_ca.key -outform pem -keyform pem -out $(CERTIFICATE_PATH)/separate_intermediate_ca.req -nodes -subj '/CN=Separate Intermediate CA'
-	# openssl x509 -req -CA $(CERTIFICATE_PATH)/root_ca.pem -CAkey $(CERTIFICATE_PATH)/root_ca.key -in $(CERTIFICATE_PATH)/separate_intermediate_ca.req -out $(CERTIFICATE_PATH)/separate_intermediate_ca.pem -extensions v3_ca -days 365 -CAcreateserial -extfile $(TEST_APP_PATH)/openssl.conf -CAserial $(CERTIFICATE_PATH)/separate_intermediate.srl
-	# openssl req -newkey 4096 -keyout $(CERTIFICATE_PATH)/separate_client.key -outform pem -keyform pem -out $(CERTIFICATE_PATH)/separate_client.req -nodes -subj '/CN=Separate Client'
-	# openssl x509 -req -CA $(CERTIFICATE_PATH)/separate_intermediate_ca.pem -CAkey $(CERTIFICATE_PATH)/separate_intermediate_ca.key -in $(CERTIFICATE_PATH)/separate_client.req -out $(CERTIFICATE_PATH)/separate_client.pem -extensions v3_client -days 365 -CAcreateserial -extfile $(TEST_APP_PATH)/openssl.conf -CAserial $(CERTIFICATE_PATH)/separate_client.srl
-
 copy_certs:
 	cat $(CERTIFICATE_PATH)/client.pem $(CERTIFICATE_PATH)/intermediate_ca.pem > $(CERTIFICATE_PATH)/combined_client.pem
 	cat $(CERTIFICATE_PATH)/alt_client.pem $(CERTIFICATE_PATH)/alt_intermediate_ca.pem > $(CERTIFICATE_PATH)/alt_combined_client.pem
