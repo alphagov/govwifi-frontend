@@ -1,9 +1,6 @@
 rest {
     tls {
-        verify_cert = yes
-        #verify_cert_cn = yes
-        cacertdir = /etc/raddb/certs
-        cacertfile = comodoCA.pem
+        verify_cert = no
     }
 
     authorisation_api_base_url = "$ENV{AUTHORISATION_API_BASE_URL}"
