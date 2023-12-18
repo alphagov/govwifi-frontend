@@ -3,7 +3,7 @@ FROM ruby:3.2.2-alpine
 RUN apk --update --no-cache add wpa_supplicant openssl make gcc libc-dev curl talloc-dev jq g++ zlib-dev \
                                 openssl-dev linux-headers python3 py3-pip py3-wheel net-tools tmux sqlite-libs \
                                 sqlite sqlite-dev libxml2 curl-dev json-c-dev libmemcached-dev \
-                                mariadb-connector-c-dev
+                                mariadb-connector-c-dev py-watchdog
 
 RUN wget https://github.com/FreeRADIUS/freeradius-server/releases/download/release_3_2_2/freeradius-server-3.2.2.tar.gz \
     && tar xzvf freeradius-server-3.2.2.tar.gz \
@@ -26,7 +26,6 @@ RUN curl https://github.com/bvantagelimited/freeradius_exporter/releases/downloa
  && mv freeradius_exporter /usr/sbin/freeradius_exporter \
  && chmod 755 /usr/sbin/freeradius_exporter
  
-RUN pip3 install watchdog==2.1.9
 COPY config_watch.py /usr/bin
 COPY scripts/run*.sh scripts/db_utils.sh scripts/vars.sh /usr/bin/
 RUN chmod 755 /usr/bin/*.sh
