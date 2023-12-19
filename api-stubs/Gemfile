@@ -4,7 +4,7 @@ source "http://rubygems.org"
 ruby File.read(".ruby-version").chomp
 
 gem "puma"
-gem "sqlite3"
+gem "sqlite3", force_ruby_platform: true
 gem "sequel"
 gem "sinatra"
 gem "rspec"

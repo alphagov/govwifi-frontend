@@ -32,10 +32,12 @@ RUN chmod 755 /usr/bin/*.sh
 
 COPY api-stubs /api-stubs
 WORKDIR /api-stubs
+RUN bundle config force_ruby_platform true
 RUN bundle install
 
 COPY test-app /test-app
 WORKDIR /test-app
+RUN bundle config force_ruby_platform true
 RUN bundle install
 
 COPY healthcheck /healthcheck
