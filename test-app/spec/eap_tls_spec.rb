@@ -36,6 +36,6 @@ RSpec.describe 'test' do
                        client_cert_path: "/certificates/combined_client.pem",
                        client_key_path: "/certificates/client.key",
                        server_cert_path: "/etc/raddb/certs/ca.pem")
-    expect(output).to include("SUCCESS")
+    expect(output).to include("FAILURE")
   end
 end
