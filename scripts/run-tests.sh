@@ -6,19 +6,25 @@ source /usr/bin/db_utils.sh
 source /usr/bin/vars.sh
 
 (
-  cd /api-stubs
+  delete_databases
   export AUTH_DB="/tmp/auth_test.db"
   export LOGGING_DB="/tmp/logging_test.db"
   create_databases
+  cd /api-stubs
   bundle exec rspec
-  delete_databases
 )
 
+retVal=$?
+
+if [ $retVal -ne 0 ]; then
+  exit $retVal
+fi
+
 (
-  cd /api-stubs
   export AUTH_DB="/tmp/auth.db"
   export LOGGING_DB="/tmp/logging.db"
   create_databases
+  cd /api-stubs
   bundle exec rackup -o 0.0.0.0 -p 80 &
 )
 
