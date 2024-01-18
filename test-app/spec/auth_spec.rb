@@ -2,8 +2,7 @@ require "sinatra/base"
 require "json"
 require 'sequel'
 require 'sqlite3'
-require "commands"
-require "eapol_test_helper"
+require "govwifi_eapoltest"
 require "_spec_helper"
 
 RSpec.shared_examples "it rejects authentication attempt" do |command|
@@ -17,34 +16,36 @@ RSpec.shared_examples "it rejects authentication attempt" do |command|
 end
 
 RSpec.describe 'test' do
+  PAP_CMD = "radtest testing password localhost 0 testing123"
+  CHAP_CMD = "radtest -t chap testing password localhost 0 testing123"
+  MSCHAP_CMD = "radtest -t mschap testing password localhost 0 testing123"
+
   it_behaves_like "it rejects authentication attempt", PAP_CMD
   it_behaves_like "it rejects authentication attempt", CHAP_CMD
   it_behaves_like "it rejects authentication attempt", MSCHAP_CMD
 
+  let(:eapol_test) { GovwifiEapoltest.new(radius_ips: ["127.0.0.1"], secret: "testing123") }
+  let(:username) { ENV.fetch("HEALTH_CHECK_IDENTITY") }
+  let(:password) { ENV.fetch("HEALTH_CHECK_PASSWORD") }
+
   it "rejects authentication with the wrong password" do
-    output = run_eapol(PEAP_MSCHAPv2_CONFIG_PATH,
-                       username: ENV.fetch("HEALTH_CHECK_IDENTITY"),
-                       password: "wrong_password")
-    expect(output).to include("FAILURE")
+    expect(eapol_test.run_peap_mschapv2(username:, password: "wrong_password")
+    ).to all have_failed
   end
 
   it "rejects authentication with the wrong username" do
-    output = run_eapol(PEAP_MSCHAPv2_CONFIG_PATH,
-                       username: "wrong_username",
-                       password: ENV.fetch("HEALTH_CHECK_PASSWORD"))
-    expect(output).to include("FAILURE")
+    expect(eapol_test.run_peap_mschapv2(username: "wrong", password:)
+    ).to all have_failed
   end
 
   it "authenticates successfully with the correct username and password" do
-    output = run_eapol(PEAP_MSCHAPv2_CONFIG_PATH,
-                       username: ENV.fetch("HEALTH_CHECK_IDENTITY"),
-                       password: ENV.fetch("HEALTH_CHECK_PASSWORD"))
-    expect(output).to include("SUCCESS")
+    expect(eapol_test.run_peap_mschapv2(username:, password:)
+    ).to all have_been_successful
   end
 
   it "logs a successful authentication attempt" do
     expect {
-      run_eapol(PEAP_MSCHAPv2_CONFIG_PATH)
+      eapol_test.run_peap_mschapv2(username:, password:)
     }.to change { LoggingLine.all.count }.by(1)
   end
 

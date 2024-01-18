@@ -1,6 +1,5 @@
 require 'spec_helper'
 
-
 RSpec.describe ApiStub do
   describe "stubs" do
     describe "/authorize/user/:name" do

@@ -3,6 +3,7 @@
 source "http://rubygems.org"
 ruby File.read(".ruby-version").chomp
 
+gem "govwifi_eapoltest", "~> 0.2.0"
 gem "puma"
 gem "sqlite3", force_ruby_platform: true
 gem "sequel"
