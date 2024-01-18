@@ -17,11 +17,15 @@ class ApiStub < Sinatra::Base
     set :port, 80
   end
 
-  get "/authorize/user/*" do
-    line = AuthLine.create(line: request.path_info)
-    puts "** #{line.to_hash}"
-    content_type :json
-    { "control:Cleartext-Password": ENV["HEALTH_CHECK_PASSWORD"] }.to_json
+  get "/authorize/user/:name/*" do
+    if params["name"] == ENV["HEALTH_CHECK_IDENTITY"]
+      line = AuthLine.create(line: request.path_info)
+      puts "** #{line.to_hash}"
+      content_type :json
+      { "control:Cleartext-Password": ENV["HEALTH_CHECK_PASSWORD"] }.to_json
+    else
+      status 404
+    end
   end
 
   post "/logging/post-auth" do
