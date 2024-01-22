@@ -21,11 +21,6 @@
 				max_entries = 255
 			}
 
-			verify {
-				tmpdir = /tmp/radiusd
-				client = "/usr/bin/openssl verify -CApath ${certdir}/trusted_certificates %{TLS-Client-Cert-Filename}"
-			}
-
 			ocsp {
 				enable = no
 				override_cert_url = yes

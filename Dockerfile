@@ -8,7 +8,7 @@ RUN apk --update --no-cache add wpa_supplicant openssl make gcc libc-dev curl ta
 RUN wget https://github.com/FreeRADIUS/freeradius-server/releases/download/release_3_2_2/freeradius-server-3.2.2.tar.gz \
     && tar xzvf freeradius-server-3.2.2.tar.gz \
     && cd freeradius-server-3.2.2 \
-    && ./configure --sysconfdir=/etc \
+    && ./configure CPPFLAGS=-DX509_V_FLAG_PARTIAL_CHAIN=1 --sysconfdir=/etc \
     && make \
     && make install
 RUN rm -rf ./freeradius-server-3.2.2

@@ -52,9 +52,7 @@ copy_certs:
 
 	mkdir -p $(TRUSTED_CERTIFICATES_PATH)
 
-	# cp $(CERTIFICATE_PATH)/separate_intermediate_ca.pem $(TRUSTED_CERTIFICATES_PATH)/separate_intermediate_ca.pem
 	cp $(CERTIFICATE_PATH)/intermediate_ca.pem $(TRUSTED_CERTIFICATES_PATH)/intermediate_ca.pem
-	cp $(CERTIFICATE_PATH)/root_ca.pem $(TRUSTED_CERTIFICATES_PATH)/root_ca.pem
 
 rehash_certs:
 	c_rehash $(TRUSTED_CERTIFICATES_PATH)
