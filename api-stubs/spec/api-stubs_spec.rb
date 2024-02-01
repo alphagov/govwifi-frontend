@@ -1,28 +1,39 @@
 require 'spec_helper'
 
-
 RSpec.describe ApiStub do
   describe "stubs" do
     describe "/authorize/user/:name" do
-      let(:url) { "/authorize/user/abc/def/ghi/jkl/mno" }
-      it "returns ok" do
-        get url
-        expect(last_response).to be_ok
-      end
-      it "logs the url" do
-        get url
-        expect(DB_AUTH[:lines].find(line: url)).to_not be_nil
-      end
-      it "adds one log line" do
-        expect {
+      describe "wrong username" do
+        let(:url) { "/authorize/user/wrong/abc/def" }
+        it "returns 404" do
           get url
-        }.to change(DB_AUTH[:lines], :count).by(1)
+          expect(last_response).to_not be_ok
+        end
+        it "does not adds one log line" do
+          expect {
+            get url
+          }.to_not change(DB_AUTH[:lines], :count)
+        end
       end
-      it "returns the password" do
-        allow(ENV).to receive(:[]).with('HEALTH_CHECK_PASSWORD')
-                                  .and_return('TeaCoffee')
-        get url
-        expect(last_response.body).to eq({ "control:Cleartext-Password": "TeaCoffee" }.to_json)
+      describe "correct username" do
+        let(:url) { "/authorize/user/#{ENV["HEALTH_CHECK_IDENTITY"]}/abc/def" }
+        it "returns ok" do
+          get url
+          expect(last_response).to be_ok
+        end
+        it "logs the url" do
+          get url
+          expect(DB_AUTH[:lines].find(line: url)).to_not be_nil
+        end
+        it "adds one log line" do
+          expect {
+            get url
+          }.to change(DB_AUTH[:lines], :count).by(1)
+        end
+        it "returns the password" do
+          get url
+          expect(last_response.body).to eq({ "control:Cleartext-Password": ENV["HEALTH_CHECK_PASSWORD"] }.to_json)
+        end
       end
     end
 
