@@ -29,6 +29,7 @@ class ApiStub < Sinatra::Base
   end
 
   post "/logging/post-auth" do
+    request.body.rewind
     line = LoggingLine.create(JSON.parse(request.body.read))
     puts "** #{line.to_hash}"
     content_type :json
