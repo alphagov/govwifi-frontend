@@ -8,6 +8,7 @@ gem "puma"
 gem "sqlite3", force_ruby_platform: true
 gem "sequel"
 gem "sinatra"
+gem "rackup"
 gem "rspec"
 
 group :test do

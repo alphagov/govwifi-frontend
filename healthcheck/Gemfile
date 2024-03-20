@@ -4,6 +4,7 @@ source "http://rubygems.org"
 ruby File.read(".ruby-version").chomp
 
 gem "puma"
+gem "rackup"
 gem "sinatra"
 
 group :test do
