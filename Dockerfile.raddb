@@ -4,7 +4,6 @@ VOLUME /etc/raddb/certs
 
 RUN pip install awscli --upgrade
 
-COPY scripts/split_pem.py /split_pem.py
 COPY raddb.sh /raddb.sh
 RUN chmod +x /raddb.sh
 
