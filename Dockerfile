@@ -44,6 +44,7 @@ COPY healthcheck /healthcheck
 WORKDIR /healthcheck
 RUN bundle install
 
+RUN rm -rf /etc/raddb/certs
 VOLUME /etc/raddb/certs
 EXPOSE 1812/udp 1813/udp 3000 9812
 CMD /usr/bin/run.sh
