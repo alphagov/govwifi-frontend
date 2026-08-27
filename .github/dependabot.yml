@@ -12,3 +12,6 @@ updates:
     interval: daily
     time: "03:00"
   open-pull-requests-limit: 10
+  ignore:
+  # Ignore all update to ruby as this is handled by the ruby-updater workflow.
+  - dependency-name: "ruby"
