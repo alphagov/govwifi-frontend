@@ -1,0 +1,21 @@
+
+govlogger {
+    log_file = "banana.log"
+    rotated_log_file = "banana.rotated"
+    rotate_interval = 10
+    log_prog_command = "rm banana.rotated"
+
+    authorize {
+        log_line = "authorize: MaxSession:%{govlogger:max_sessions} UsedSessions:%{govlogger:current_sessions}"
+    }
+
+    authenticate {
+        log_line = "authenticate: MaxSession:%{govlogger:max_sessions} UsedSessions:%{govlogger:current_sessions}"
+    }
+
+    accounting {
+        log_line = "accounting: accounting-entered"
+    }
+
+}
+    

@@ -35,6 +35,13 @@ do
   sleep 2
 done
 
+GOVLOGGER_FILE="/healthcheck/govlogs.log"
+ROTATED_GOVLOGGER_FILE="/healthcheck/govlogs.rotated"
+GOVLOGGER_LOG_PROG_COMMAND="rm ${ROTATED_GOVLOGGER_FILE}"
+export GOVLOGGER_FILE
+export ROTATED_GOVLOGGER_FILE
+export GOVLOGGER_LOG_PROG_COMMAND
+
 echo "start radius server"
 cd /healthcheck && bundle exec puma -p 3000 &
 /usr/local/sbin/radiusd -X &

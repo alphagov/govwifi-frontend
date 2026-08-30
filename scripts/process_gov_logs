@@ -1,0 +1,663 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use Digest::MD5 qw(md5_hex);
+use Fcntl qw(:DEFAULT :flock);
+use FindBin ();
+use Getopt::Long ();
+use JSON ();
+use Math::BigInt ();
+
+sub Math::BigInt::TO_JSON {
+    my ($item) = @_;
+    return $item->bstr;
+}
+
+# Important things to note regarding this script:
+#   1. Gets an exclusive lock on pid file (LOCK_EX) nonblocking - and exits on failure,
+#      this ensures only one script can run at a time, the lock is released on program
+#      completion. (flocks in unix are released when process exits - unlike windows)
+#   2. Reads historic state data saved in the state file
+#   3. Opens the logfile if supplied
+#   4. Reads input from stream until end of file
+#   5. Writes out unprocessed log items to state file
+#
+# The expiry of uncomplete log lines is important. The time to expire is taken from the time
+# of the log line being processed, not the time now - this helps if we have a logging backlog, as now may
+# be far ahead of the current line being processed. This is subtle.
+
+# Fields shared between requests
+my @COMMON_FIELDS   = qw(Connect-Info Framed-MTU Calling-Station-Id User-Name NAS-Port-Type NAS-IP-Address EapSessions);
+
+# Fields used to create a UUID for the request
+my @UUID_FIELDS     = qw(User-Name NAS-IP-Address Calling-Station-Id);
+
+# Fields used to deduplicate packets between requests
+my @FIELDS_TO_DEDUP = qw(Stage EAP-Type);
+
+# Parse the many command line options...
+my (
+    $pretty, $help, $canonical, $statefile, $flush,
+    $delete, $logfile, $last_date_only, $drop_eap_peap,
+    $expiry_seconds, $unittests, $reduce_duplicates,
+    $reduce_freeradius_proxied);
+
+Getopt::Long::GetOptions(
+    canonical             => \$canonical,
+    delete                => \$delete,
+    'expires=i'           => \$expiry_seconds,
+    flush                 => \$flush,
+    help                  => \$help,
+    'logfile=s'           => \$logfile,
+    pretty                => \$pretty,
+    reduce_duplicates     => \$reduce_duplicates,
+    reduce_last_date_only => \$last_date_only,
+    reduce_drop_eap_peap  => \$drop_eap_peap,
+    reduce_freeradius_proxied => \$reduce_freeradius_proxied,
+    'state=s'             => \$statefile,
+    unittests             => \$unittests,
+)
+    or die("Invalid command line options:\n" . usage());
+
+# Display help and exit if requested
+if ($help) {
+    print usage();
+    exit;
+}
+
+$expiry_seconds ||= 5;
+
+#
+# Create JSON output formatter and parser
+#
+my $json = JSON->new->pretty($pretty || 0)->canonical($canonical || 0)->convert_blessed(1);
+
+# Nasty having unit tests in program - but it was quick
+if ($unittests) {
+    unittests();
+    exit;
+}
+
+# Ensure we are not already running by getting an exlusive filelock on a pid file
+# DO NOT CLOSE the file until our work is done - else somebody else will start work
+my $pid_filename = '/var/run/lock/process_gov_logs.pid';
+my $pid_filehandle = create_pid_file($pid_filename);
+
+# We keep loglines by Uuid and in a linked list (doubly)
+# We should probably have an object here as it's messy
+my $lines_by_uuid = {};
+my $items_by_utime_start;
+my $items_by_utime_end;
+
+#
+# Read previous state
+#
+my $state_handle;
+if ($statefile) {
+    #
+    # First try to restore previous state
+    #
+    $state_handle = IO::File->new($statefile, 'r');
+
+    if ($state_handle) {
+        restore_linked_items($state_handle);
+        $state_handle->close;
+    }
+
+    # If we are flushing all output - we will not leave any state remaining...
+    if ($flush) {
+        undef $state_handle;
+        unlink $statefile;
+    }
+    else {
+        $state_handle = IO::File->new($statefile, 'w')
+            or die("Cannot open $statefile for write: $!\n");
+    }
+}
+
+#
+# By default read from STDIN, but if file specified use this
+#
+my $ih = *STDIN;
+if ($logfile) {
+    $ih = IO::File->new($logfile, 'r');
+    if (!$ih) {
+        die("Failed to open logfile $logfile for read: $!\n");
+    }
+}
+
+#
+# Now read all items from input stream....
+#
+while (my $line = $ih->getline) {
+
+    my $data = parse_line($line);
+    next if !$data;
+
+    # We are not interested in proxied data - as EAP-PEAP
+    next if $reduce_freeradius_proxied && $data->{'FreeRADIUS-Proxied-To'};
+
+    # We use the Uuid to identify packets from same client, this might not be right,
+    # but best we can do
+    my $Uuid  = $data->{Uuid};
+
+    my $entry = delete $lines_by_uuid->{$Uuid};
+
+    # If we have a previous line by this Uuid add data to it
+    if ($entry) {
+        remove_item_from_linked_list($entry);
+        push @{ $entry->{lines} }, $data;
+    }
+    #
+    # Otherwise create a new log entry
+    #
+    else {
+        $entry = {
+            Uuid      => $Uuid,
+            lines     => [],
+            StartDate => $data->{Date},
+        };
+        #
+        # Copy the common fields
+        #
+        foreach my $field (@COMMON_FIELDS) {
+            $entry->{$field} = $data->{$field};
+        }
+        #
+        # If an identity packet - we've got the relevant info, lets not log the line
+        #
+        if (($data->{'EAP-Type'} ne 'Identity') || ($data->{Stage} ne 'authorize')) {
+            push @{ $entry->{lines} }, $data;
+        }
+    }
+
+    #
+    # If its a post-auth packet lets output and move on....
+    if ($data->{Stage} eq 'post-auth') {
+        send_to_log($entry);
+        next;
+    }
+
+    # OK - Add back into the hash and linked list
+    $lines_by_uuid->{$Uuid} = $entry;
+    add_item_to_list($entry);
+
+    # As we have a log event we have the StartDate, we can use this to expire older items in the
+    # linked list
+    my $expiry_date = $entry->{StartDate} - (Math::BigInt->new('1000000') * $expiry_seconds);
+
+    # Delete items in linked list that have expired, these will be at the start
+    # as the list is ordered by the UnixTime * 1000000 (with microsecirds) - so this is fast
+    my $item = $items_by_utime_start;
+    while ($item && ($item->{StartDate} < $expiry_date)) {
+        # Remove item from linked list
+        # Remove from Uuid map
+        # Output the log data
+        remove_item_from_linked_list($item);
+        delete $lines_by_uuid->{$item->{Uuid}};
+        send_to_log($item);
+    
+        # Move to next item
+        $item = $item->{next};
+    }
+}
+
+# If we are flushing, or no state file specified do not write state file, just output remaining items
+if ($flush || !$statefile) {
+    # Otherwise output the remaining items
+    while ($items_by_utime_start) {
+        send_to_log($items_by_utime_start);
+        $items_by_utime_start = $items_by_utime_start->{next};
+    }
+}
+elsif ($statefile) {
+    $state_handle = IO::File->new($statefile, 'w')
+        or die("Cannot open $statefile for write: $!\n");
+    save_linked_items($state_handle);
+}
+
+# If delete specified and file provided delete on success
+if ($logfile && $delete) {
+    $ih->close;
+    unlink($logfile);
+}
+
+# Finally we should delete the pidfile (for cleanliness)
+# Note we delete first, which does allow somebody to start running here, but as we are all done
+# it no longer matters....
+unlink $pid_filename;
+
+exit;
+
+sub send_to_log {
+    my ($item) = @_;
+
+    # To deduplicate the lines we run them backwards so we get the last date not the first
+    my $lines = $item->{lines};
+
+    my $last_line  = $lines->[$#$lines];
+    my $first_line = $lines->[0];
+
+    # If option reduce_drop_eap_peap we skip PEAP messages
+    return if $drop_eap_peap && $last_line->{'EAP-Type'} && $last_line->{'EAP-Type'} eq 'PEAP';
+
+    # Copy the start date and shared data
+    my $shared = {};
+    foreach my $field (@COMMON_FIELDS, 'StartDate') {
+        $shared->{$field} = $item->{$field};
+    }
+
+    my $prev_line = {};
+    LINE: foreach my $line (@$lines) {
+        delete @$line{(@COMMON_FIELDS, 'Uuid')};
+
+        # If the reduce_duplicates option is set we compare @FIELDS_TO_DEDUP
+        # and if the same compress the line into a set of dates
+        if ($reduce_duplicates) {
+            my $is_same = 0;
+            if ($prev_line) {
+                $is_same = 1;
+                DEDUP: foreach my $field (@FIELDS_TO_DEDUP) {
+                    # If the value is an array we need to squash it - hence JSON
+                    my $cur_val = $line->{$field};
+                    $cur_val = $json->encode($cur_val) if ref($cur_val);
+
+                    my $prev_val = $prev_line->{$field};
+                    $prev_val = $json->encode($prev_val) if ref($prev_val);
+
+                    # If either field not present or they are not equal we are not the same
+                    if (!defined($cur_val) || !defined($prev_val) || ($cur_val ne $prev_val)) {
+                        $is_same = 0;
+                        last DEDUP;
+                    }
+                }
+            }
+
+            if ($is_same) {
+                #
+                # If the same record the latest values, not the previous as in TLS exchanges the last has
+                # the interesting data
+                #
+                foreach my $key (keys %$line) {
+                    if ($key eq 'Date' && !$last_date_only) {
+                        my $date = $prev_line->{Date};
+                        if (ref($date)) {
+                            push @$date, $line->{Date};
+                        }
+                        else {
+                            $prev_line->{Date} = [ $prev_line->{Date}, $line->{Date} ];
+                        }
+                    }
+                    $prev_line->{$key} = $line->{$key};
+                }
+                next LINE;
+            }
+        }
+        $prev_line = $line;
+        push @{ $shared->{lines} }, $line;
+    }
+    print  $json->encode($shared),"\n";
+}
+
+sub add_item_to_list {
+    my ($item) = @_;
+
+    delete $item->{prev};
+    delete $item->{next};
+    if (!$items_by_utime_end) {
+        $items_by_utime_end = $items_by_utime_start = $item;
+        return;
+    }
+
+    # It is most likely the expiry time will be greater than the end of the list
+    # so we will start looking at the end
+
+    my $datetime = $item->{StartDate};
+
+    # After is the item we want to insert after....
+    my $after = $items_by_utime_end;
+    my $is_end = 1;
+    while ($after->{StartDate} > $datetime) {
+        $is_end = 0;
+        my $previous = $after->{prev};
+        
+        # If we havnt a previous we want to insert at the start
+        if (!$previous) {
+            $items_by_utime_start->{prev} = $item;
+            $item->{next} = $items_by_utime_start;
+            $items_by_utime_start = $item;
+            return;
+        }
+            
+        $after = $previous;
+    }
+
+    if ($is_end) {
+        $items_by_utime_end->{next} = $item;
+        $item->{prev} = $items_by_utime_end;
+        $items_by_utime_end = $item;
+        return;
+    }
+
+    # At this point their must be a next - as is_end is false
+    my $next = $after->{next};
+
+    $after->{next} = $item;
+    $item->{prev} = $after;
+    $item->{next} = $next;
+
+    $next->{prev} = $item;
+}
+        
+
+sub remove_item_from_linked_list {
+    my ($item) = @_;
+
+    my $prev = $item->{prev};
+    my $next = $item->{next};
+    if ($prev) {
+        $prev->{next} = $next;
+    }
+    else {
+        $items_by_utime_start = $next;
+    }
+
+    if ($next) {
+        $next->{prev} = $prev;
+    }
+    else {
+        $items_by_utime_end = $prev;
+    }
+    delete $item->{prev};
+    delete $item->{next};
+    return $item;
+}
+
+sub parse_line {
+    my ($line) = @_;
+
+    #
+    # The open close statements are not worth trying to parse
+    # they are generated when govlogger closes the file
+    #
+    return if $line =~ m/^GovLogger closing/;
+
+    if ($line =~ m/^(\d+\.\d+)\s+(.*?): (.+)/) {
+        my ($date, $stage, $j) = ($1,$2, $3);
+
+        my $data;
+        {
+            local $@;
+            eval {
+                $data = $json->decode($j);
+            };
+            if ($@) {
+                print STDERR "Got JSON error decoding:\n$j$_\n\n";
+            }
+        }
+        return if !$data;
+
+        # Put session and request vars into same map, and add the Stage
+        my $flattened = {%{ $data->{Request} }, %{ $data->{Session} }, Stage => $stage, EapSessions => $data->{EapSessions} };
+
+        # Turn the date into 64 bit integer, unixtime * 1,000,000 with microseconds added
+        if ($date =~ /^(\d+)\.(\d+)$/) {
+            # We will use a Bigint here
+            $flattened->{Date} = Math::BigInt->new($1) * 1000000 + Math::BigInt->new($2);
+        }
+        else {
+            $flattened->{Date} = $date;
+        }
+        $flattened->{Uuid} = md5_hex( join('|', @$flattened{@UUID_FIELDS}) );
+        return $flattened;
+    }
+    else {
+        print STDERR "ERROR line syntax wrong: $line";
+        return undef;
+    }
+}
+
+sub restore_linked_items {
+    my ($file) = @_;
+
+    # Ensure list is empty
+    undef $items_by_utime_start;
+    undef $items_by_utime_end;
+
+    # And map by Uuid is empty
+    $lines_by_uuid = {};
+    
+    my $text = '';
+    while (my $line = $file->getline) {
+        $text .= $line;
+    }
+
+    my $items;
+    {
+        local $@;
+        eval {
+            $items = $json->decode($text);
+        };
+        die("Failed to decode JSON from state file: $@\n")
+            if $@;
+    }
+
+    foreach my $item (@$items) {
+        $item->{StartDate} = Math::BigInt->new($item->{StartDate});
+        add_item_to_list($item);
+        $lines_by_uuid->{ $item->{Uuid} } = $item;
+    }
+}
+
+sub save_linked_items {
+    my ($file) = @_;
+
+    my @to_write;
+    my $item = $items_by_utime_start;
+
+    while ($item) {
+        my $next = delete $item->{next};    
+        delete $item->{prev};
+
+        push @to_write, $item;
+        $item = $next;
+    }
+
+    $file->print($json->encode(\@to_write));
+    $file->flush;
+}
+
+        
+
+sub usage {
+    return $FindBin::Script . ' [--help|-h] [--pretty|-p] [--canonical|-c] [--state statefile]
+    [--logfile|-l logfile] [--expires|-e seconds] [--delete|-d] ...
+Read from log data from freeradius using the govlogger and output structured JSON log events.
+Data is read until end of stream or file. The program uses a pidfile process_gov_logs.pid and
+exits with error of running more than once.
+
+As some events may not be complete you can specify a state file to store log events that have
+not completed. This is read at program start, and rewritten on exit allowing continual processing
+of log events without data loss.
+
+   --canonical|-c Order fields alphanumerically
+   --delete|-d    Delete the logfile after successful processing
+   --expires|-e   The number of seconds before a log event is output if no post-auth message has been
+                  recieved. NOTE: Expiry is taken from the time on successive log events, not the time
+                  now, as we may have a log backlog and we would not want to exire each entry.
+                  The value defaults to 5. This number should be fairly small, the max time an access point
+                  authentication process would take (normally under a second).
+   --flush|-f     Push all data out at end, even if not complete log event, this is used mainly
+                  during testing to ensure parsing split data file produces same output as single
+                  datafile.
+   --help|-h      Produces this help
+   --logfile|-l   By default the program reads from stdin, if specified the file is renamed \'.rotated\'
+                  and a then \'delay\' seconds are allowed to elapse before the file is opened for processing.
+   --pretty|-p    Produces pretty JSON
+   --reduce_duplicates     For repeated packets, such as those during a TLS key exchange only log a single
+                           line with an array of dates for each packet.
+   --reduce_freeradius_proxied This skips lines with the attribute "FreeRADIUS-Proxied-To" defined.
+   --reduce_last_date_only Only show the last date for entries with identical data, i.e. TLS negotiation
+                           which would have 6 events logged. (Only works if reduce_duplicates enabled)
+   --reduce_drop_eap_peap  Drop EAP-PEAP log events.
+   --state|-s     Filename to restore and store state between invocations
+   --unittests|-u Run unit tests on methods in code
+';
+}
+
+# Create a pid file, and read previous, use LOCK_EX so only one
+# process can own the file. DO NOT close the filehandle until
+# all our work is done - else it's not an exlusive semaphore
+sub create_pid_file {
+    my ($pidfile) = @_;
+
+    # Open the pidfile read write
+    sysopen my $pid_filehandle, $pidfile, O_RDWR|O_CREAT
+                || die qq/Cannot open pid file "$pidfile": $!\n/;
+
+    my $maybe = <$pid_filehandle>;
+    my ($pid) = $maybe =~ /^(\d+)/ if (defined $maybe);
+    $pid ||= '?';
+
+    # Try to get an exclusive lock on the pidfile
+    flock($pid_filehandle, LOCK_EX | LOCK_NB)
+        || die qq/pid "$pidfile" already locked (pid=$pid)\n/;
+
+    print STDERR "Pid file from previous run still exists: (pid=$pid)\n"
+        if $pid ne '?';
+
+    # Seek back to start of file and truncate
+    seek($pid_filehandle, 0, 0);
+    truncate($pid_filehandle,0);
+
+    print $pid_filehandle "$$\n";
+    $pid_filehandle->flush;
+    return $pid_filehandle;
+}
+
+sub unittests {
+    #
+    # Check lockfile
+    #
+    my $pidfile;
+    eval {
+        $pidfile = create_pid_file('/tmp/banana');
+    };
+
+    die("Failed to create pidfile /tmp/banana calling create_pid_file()\n") if !$pidfile;
+    print "Pidfile /tmp/banana created\n";
+
+    my $file = IO::File->new('/tmp/banana','r');
+    die("Failed to open pidfile /tmp/banana: $!\n") if !$file;
+
+    my $pid = $file->getline;
+    chomp($pid);
+    die("Pid file /tmp/banana did not contain a process id\n") if $pid !~ m/^\d+$/;
+    print "Pidfile /tmp/banana contained pid $pid\n";
+
+    die("Pid does not match programs $pid != $$\n") if $pid != $$;
+    print "Pidfile /tmp/banana contained pid $pid, matching current process pid $$\n";
+
+    my $second_lock;
+    eval {
+        $second_lock = create_pid_file('/tmp/banana');
+    };
+
+    die("Lock on /tmp/banana not exclusive, successfull second lock on calling create_pid_file()\n")
+        if $second_lock;
+    print "Failed to get second lock on /tmp/banana calling create_pid_file() - Success\n";
+
+    $pidfile->close;
+    eval {
+        $second_lock = create_pid_file('/tmp/banana');
+    };
+
+    die("Failed to get lock on /tmp/banana after closing lock calling create_pid_file()\n")
+        if !$second_lock;
+    print "Successfully got second lock after closing previous calling create_pid_file()\n";
+    $second_lock->close;
+    unlink('/tmp/banana');
+
+    #
+    # Check linked list
+    #
+    my @items = (
+        { name => 'entry0', Uuid => 1, StartDate => Math::BigInt->new(8) },
+        { name => 'entry1', Uuid => 2, StartDate => Math::BigInt->new(10) },
+        { name => 'entry2', Uuid => 3, StartDate => Math::BigInt->new(12) },
+        { name => 'entry3', Uuid => 4, StartDate => Math::BigInt->new(14) },
+        { name => 'entry4', Uuid => 5, StartDate => Math::BigInt->new(16) },
+    );
+        
+    add_item_to_list($items[1]);
+    add_item_to_list($items[3]);
+    add_item_to_list($items[2]);
+    add_item_to_list($items[4]);
+    add_item_to_list($items[0]);
+
+    check_items_in_right_order(@items);
+
+    # remove item from middle
+    remove_item_from_linked_list($items[2]);
+    check_items_in_right_order($items[0], $items[1], $items[3], $items[4]);
+
+    add_item_to_list($items[2]);
+    check_items_in_right_order(@items);
+
+    print "Item added back in ok\n";
+    
+    # remove item from start
+    remove_item_from_linked_list($items[0]);
+    check_items_in_right_order($items[1], $items[2], $items[3], $items[4]);
+
+    print "Item remove ok from start\n";
+
+    add_item_to_list($items[0]);
+    check_items_in_right_order(@items);
+
+    # remove item from start
+    remove_item_from_linked_list($items[4]);
+    check_items_in_right_order($items[0], $items[1], $items[2], $items[3]);
+
+    print "Item remove ok from end\n";
+
+    # Remove one before start...
+    add_item_to_list($items[4]);
+    remove_item_from_linked_list($items[1]);
+    check_items_in_right_order($items[0], $items[2], $items[3], $items[4]);
+
+    print "Item remove one before start ok\n";
+
+    # Remove one before end...
+    add_item_to_list($items[1]);
+    remove_item_from_linked_list($items[3]);
+    check_items_in_right_order($items[0], $items[1], $items[2], $items[4]);
+    add_item_to_list($items[3]);
+
+    # Now check the saving of state works
+    my $fh = IO::File->new('/tmp/banana','w');
+    save_linked_items($fh);
+    $fh = IO::File->new('/tmp/banana','r');
+    restore_linked_items($fh);
+    check_items_in_right_order(@items);
+    print "Items saved and restored from state file\n";
+}
+
+sub check_items_in_right_order {
+    my (@items) = @_;    
+    my $start = $items_by_utime_start;
+    my $index = 0;
+    while ($start) {
+        die("Item $index in linked list was not expected  ",$items[$index]{name}," but was $start->{name}\n")
+            if $items[$index]{name} ne $start->{name};
+        print "Item $index in linked list was as expected $start->{name}\n";
+        $index++;
+        $start = $start->{next};
+    }
+
+    die("Not all items found in list that were inserted\n") if $index != @items;
+    print "Successfully found all items in list in right order\n";
+}
+ 

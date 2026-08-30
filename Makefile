@@ -16,6 +16,7 @@ clean:
 
 test: clean build certs
 	docker run $(DOCKER_FLAGS) --rm  -v=$(CERTIFICATE_PATH):/certificates -v=$(CURDIR)/radius:/etc/raddb -v=$(CURDIR)/radius/certs:/etc/raddb/certs -v=$(TRUSTED_CERTIFICATES_PATH):/etc/raddb/certs/trusted_certificates -p 1812-1813:1812-1813/udp -p 3000:3000 -p 9812:9812 --name govwifi-frontend-c govwifi-frontend /usr/bin/run-tests.sh
+	docker run $(DOCKER_FLAGS) --rm  --name govwifi-frontend-c govwifi-frontend /usr/bin/process_gov_logs -u
 
 lint: build
 	docker run $(DOCKER_FLAGS) --rm -v=$(CURDIR)/radius:/etc/raddb -v=$(CURDIR)/radius/certs:/etc/raddb/certs -p 1812-1813:1812-1813/udp -p 3000:3000 -p 9812:9812 govwifi-frontend /bin/sh -c "cd /healthcheck && bundle exec rubocop -d"
@@ -40,6 +41,9 @@ create_certs:
 	openssl req -newkey 4096 -keyout $(CERTIFICATE_PATH)/client.key -outform pem -keyform pem -out $(CERTIFICATE_PATH)/client.req -nodes -subj '/CN=Client'
 	openssl x509 -req -CA $(CERTIFICATE_PATH)/intermediate_ca.pem -CAkey $(CERTIFICATE_PATH)/intermediate_ca.key -in $(CERTIFICATE_PATH)/client.req -out $(CERTIFICATE_PATH)/client.pem -extensions v3_client -days 365 -CAcreateserial -extfile $(TEST_APP_PATH)/openssl.conf -CAserial $(CERTIFICATE_PATH)/client.srl
 
+	openssl req -newkey 4096 -keyout $(CERTIFICATE_PATH)/client_expired.key -outform pem -keyform pem -out $(CERTIFICATE_PATH)/client_expired.req -nodes -subj '/CN=ClientExpired'
+	openssl x509 -req -CA $(CERTIFICATE_PATH)/intermediate_ca.pem -CAkey $(CERTIFICATE_PATH)/intermediate_ca.key -in $(CERTIFICATE_PATH)/client_expired.req -out $(CERTIFICATE_PATH)/client_expired.pem -extensions v3_client -days -1 -CAcreateserial -extfile $(TEST_APP_PATH)/openssl.conf -CAserial $(CERTIFICATE_PATH)/client_expired.srl
+
 	openssl req -newkey 4096 -keyout $(CERTIFICATE_PATH)/alt_intermediate_ca.key -outform pem -keyform pem -out $(CERTIFICATE_PATH)/alt_intermediate_ca.req -nodes -subj '/CN=Alternate Intermediate CA'
 	openssl x509 -req -CA $(CERTIFICATE_PATH)/root_ca.pem -CAkey $(CERTIFICATE_PATH)/root_ca.key -in $(CERTIFICATE_PATH)/alt_intermediate_ca.req -out $(CERTIFICATE_PATH)/alt_intermediate_ca.pem -extensions v3_ca -days 365 -CAcreateserial -extfile $(TEST_APP_PATH)/openssl.conf -CAserial $(CERTIFICATE_PATH)/alt_intermediate.srl
 
@@ -49,6 +53,7 @@ create_certs:
 copy_certs:
 	cat $(CERTIFICATE_PATH)/client.pem $(CERTIFICATE_PATH)/intermediate_ca.pem > $(CERTIFICATE_PATH)/combined_client.pem
 	cat $(CERTIFICATE_PATH)/alt_client.pem $(CERTIFICATE_PATH)/alt_intermediate_ca.pem > $(CERTIFICATE_PATH)/alt_combined_client.pem
+	cat $(CERTIFICATE_PATH)/client_expired.pem $(CERTIFICATE_PATH)/alt_intermediate_ca.pem > $(CERTIFICATE_PATH)/combined_client_expired.pem
 
 	mkdir -p $(TRUSTED_CERTIFICATES_PATH)
 

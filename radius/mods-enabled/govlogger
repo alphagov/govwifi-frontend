@@ -1,0 +1,113 @@
+
+govlogger {
+
+	#
+	#  The only options for the JSON module are to control the output
+	#  format of the `json_encode` xlat.
+	#
+	encode {
+
+		#
+		#  output_mode:: set the format of JSON documenta
+		#  that should be created. This may be one of:
+		#
+		#  - object
+		#  - object_simple
+		#  - array
+		#  - array_of_names
+		#  - array_of_values
+		#
+		#  Examples of each format are given below.
+		#
+		output_mode = object_simple
+
+		#
+		#  ### Formatting options for attribute names
+		#
+		attribute {
+			#
+			#  prefix:: Add a colon-delimited prefix to all
+			#  attribute names in the output document. For example,
+			#  with a prefix of "foo", `User-Name` will be output as
+			#  `foo:User-Name`.
+			#
+                        #prefix =
+		}
+
+		#
+		#  ### Formatting options for attribute values
+		#
+		value {
+
+			#
+			#  single_value_as_array:: always put values in an array
+			#
+			#  Output formats will by default put single values as a
+			#  JSON object (string, integer, etc). More than one
+			#  value will, depending on the output format, be added
+			#  as an array.
+			#
+			#  When this option is enabled, values will always be
+			#  added as an array.
+			#
+                        #single_value_as_array = no
+
+			#
+			#  enum_as_integer:: output the integer value of
+			#  enumerated attributes
+			#
+			#  Where an attribute has enum values, the textual
+			#  representation of the value will normally be output.
+			#  Enable this option to force the numeric value
+			#  instead.
+			#
+                        #enum_as_integer = no
+
+			#
+			#  dates_as_integer:: output dates as seconds since the
+			#  epoch
+			#
+			#  Where an attribute is a date, the textual
+			#  representation of the date will normally be output.
+			#  Enable this option to force the date to be rendered
+			#  as seconds since the epoch instead.
+			#
+                        #dates_as_integer = no
+
+			#
+			#  always_string:: force all values to be strings
+			#
+			#  Integer values are normally written to the JSON
+			#  document as numbers (i.e. without quotes). Enable
+			#  this option to force all values to be as quoted
+			#  strings.
+			#
+                        #always_string = no
+		}
+
+	}
+
+    log_file         = $ENV{GOVLOGGER_FILE}
+    rotated_log_file = $ENV{ROTATED_GOVLOGGER_FILE}
+
+    # How long for log rotate program to wait to ensure file closed...
+    rotate_interval = 5
+
+    # The script for handling the logs
+    # Stderr should go somewhere sensible and stdout could go through a pipe somewhere
+    log_prog_command = $ENV{GOVLOGGER_LOG_PROG_COMMAND}
+
+    # By lowering the nice level we do not affect freeradius operation
+    log_prog_nice = 10
+
+    warn_if_rotated_file_present = yes
+    log_prog_keep_stderr = yes
+
+    post-auth {
+        govlogger_line = "%c.%M post-auth: {\"Request\":%{govlogger_json:request:[*] !State !EAP-Message !Message-Authenticator !Service-Type !MS-CHAP-Challenge !MS-CHAP2-Response !TLS-Cert-Valid-Since !TLS-Cert-Common-Name !TLS-Cert-Issuer !TLS-Cert-Subject !TLS-Client-Cert-Common-Name !TLS-Client-Cert-Issuer !TLS-Client-Cert-Subject !TLS-Client-Cert-Valid-Since !TLS-Client-Cert-X509v3-Authority-Key-Identifier !TLS-Client-Cert-X509v3-Basic-Constraints !TLS-Client-Cert-X509v3-Subject-Key-Identifier},\"Session\":%{govlogger_json:session-state:[*] !TLS-Session-Information !TLS-Session-Version !Framed-MTU},\"EapSessions\":%{govlogger:used_sessions}}\n"
+    }
+
+    authorize {
+        govlogger_line = "%c.%M authorize: {\"Request\":%{govlogger_json:request:[*] !State !EAP-Message !Message-Authenticator !Service-Type !MS-CHAP-Challenge !MS-CHAP2-Response !TLS-Cert-Valid-Since !TLS-Cert-Common-Name !TLS-Cert-Issuer !TLS-Cert-Subject !TLS-Client-Cert-Common-Name !TLS-Client-Cert-Issuer !TLS-Client-Cert-Subject !TLS-Client-Cert-Valid-Since !TLS-Client-Cert-X509v3-Authority-Key-Identifier !TLS-Client-Cert-X509v3-Basic-Constraints !TLS-Client-Cert-X509v3-Subject-Key-Identifier},\"Session\":%{govlogger_json:session-state:[*] !TLS-Session-Information !TLS-Session-Version !Framed-MTU},\"EapSessions\":%{govlogger:used_sessions}}\n"
+    }
+}

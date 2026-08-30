@@ -1,0 +1,74 @@
+SUCCESS: (open_logfile_test() line 134) successfully opened log file
+SUCCESS: (open_logfile_test() line 143)open_logfile_test file_rotate_check_ctime set correctly to xxxx
+SUCCESS: (open_logfile_test() line 153) last_failed_open_time correctly set to 0
+SUCCESS: (open_logfile_test() line 161) log_file use_count correctly set to 0
+SUCCESS: (open_logfile_test() line 176) correctly did not open log file due to recent failed open
+SUCCESS: (open_logfile_test() line 187) correctly did not open log file due to recent failed open
+SUCCESS: (open_logfile_test() line 199) successfully opened log file after LOGFILE_OPEN_RETRY_SECONDS
+SUCCESS: (open_logfile_test() line 208)open_logfile_test file_rotate_check_ctime set correctly to xxxx
+SUCCESS: (open_logfile_test() line 218) last_failed_open_time correctly set to 0
+SUCCESS: (open_logfile_test() line 226) log_file use_count correctly set to 0
+SUCCESS: (get_free_logfile_test() line 264) successfully got log file on initial call
+SUCCESS: (get_free_logfile_test() line 272) file_rotate_check_ctime correctly set on initial get_logfile call
+SUCCESS: (get_free_logfile_test() line 280) use count correctly set to 1 after initial open
+SUCCESS: (get_free_logfile_test() line 289) successfully got log file on second call
+SUCCESS: (get_free_logfile_test() line 297) use count correctly set to 2 after second call
+SUCCESS: (get_free_logfile_test() line 305) successfully returned the same file handle on second call
+SUCCESS: (get_free_logfile_test() line 315) correctly decremented use count to 1 after freeing first handle
+SUCCESS: (get_free_logfile_test() line 324) logfile is still open and writable after freeing second handle as expected
+SUCCESS: (get_free_logfile_test() line 335) correctly decremented use count to 0 after freeing second handle
+SUCCESS: (get_free_logfile_test() line 348) successfully got log file after rotation time passed
+SUCCESS: (get_free_logfile_test() line 357) did not set closed_file when last instance freed before rotation
+SUCCESS: (get_free_logfile_test() line 365) Use count was 1 as expected
+SUCCESS: (get_free_logfile_test() line 374) File was rotated as expected
+SUCCESS: (get_free_logfile_test() line 382) Read line from rotated log file
+SUCCESS: (get_free_logfile_test() line 388) First line of rotated log file matched expected
+SUCCESS: (get_free_logfile_test() line 394) Rotated log file contained only single line
+SUCCESS: (get_free_logfile_test() line 403) logfile2 is open and writable after rotation as expected
+SUCCESS: (get_free_logfile_test() line 413) successfully got second log file after rotation
+SUCCESS: (get_free_logfile_test() line 424) correctly set use count to 2 after getting second handle post rotation
+SUCCESS: (get_free_logfile_test() line 451) correctly returned a different file handle after rotation with file
+SUCCESS: (get_free_logfile_test() line 460) correctly set closed_file when rotating with file still in use
+SUCCESS: (get_free_logfile_test() line 470) correctly set current log_file use count to 1 after rotation with file still in use
+SUCCESS: (get_free_logfile_test() line 479) correctly set closed_file log_file use count to 1 after rotation with file still in use
+SUCCESS: (get_free_logfile_test() line 496) correctly set closed_file to NULL after freeing all handles
+SUCCESS: (get_free_logfile_test() line 505) correctly set use count to 0 after freeing all handles
+SUCCESS: (post_process_command_test() line 560) successfully returned the same file handle on initial calls
+SUCCESS: (post_process_command_test() line 568) use count correctly set to 2 after initial opens
+All tests completed successfully
+STDOUT
+ open_logfile_test()
+ rlm_govlogger: opened log file "build/tests/govlogger/govlogger.output" append
+ rlm_govlogger: opened log file "build/tests/govlogger/govlogger.output" append
+ mod_detach()
+ Closing govlogger
+ get_free_logfile_test()
+ rlm_govlogger: opened log file "build/tests/govlogger/govlogger.output" append
+ Test Forcing rotation
+ rlm_govlogger: no threads using rotated file build/tests/govlogger/govlogger.output.rotated
+ rlm_govlogger: Rotated log file by renaming "build/tests/govlogger/govlogger.output" to "build/tests/govlogger/govlogger.output.rotated"
+ rlm_govlogger: Running post processing command "cat build/tests/govlogger/govlogger.output.rotated >> build/tests/govlogger/govlogger.output.total && rm build/tests/govlogger/govlogger.output.rotated" pid xxxx
+ rlm_govlogger: opened log file "build/tests/govlogger/govlogger.output" append
+ Getting again should not rotate
+ ... and it didnt
+ Forcing rotation once again, but with user of file...
+ rlm_govlogger: log processing program with pid xxxx has finished exit_status 0
+ rlm_govlogger: no threads using rotated file build/tests/govlogger/govlogger.output.rotated
+ rlm_govlogger: Rotated log file by renaming "build/tests/govlogger/govlogger.output" to "build/tests/govlogger/govlogger.output.rotated"
+ rlm_govlogger: log file "build/tests/govlogger/govlogger.output" was in use by 1 threads(s) - keeping reference until finished
+ rlm_govlogger: opened log file "build/tests/govlogger/govlogger.output" append
+ ...done
+ Should have rotated but without close and process
+ Now freeing logfiles, first current, second rotated
+ rlm_govlogger: closed rotated log file as all threads finished
+ rlm_govlogger: Running post processing command "cat build/tests/govlogger/govlogger.output.rotated >> build/tests/govlogger/govlogger.output.total && rm build/tests/govlogger/govlogger.output.rotated" pid xxxx
+ Should have forced post processing
+ mod_detach()
+ Closing govlogger
+ Waiting for post processing command to complete
+ rlm_govlogger: log processing program with pid xxxx has finished exit_status 0
+ post_process_command_test()
+ rlm_govlogger: opened log file "build/tests/govlogger/govlogger.output" append
+ mod_detach()
+ Closing govlogger
+STDERR

@@ -1,34 +1,43 @@
 server inner-tunnel {
-authorize {
-	filter_username
-	eap {
-		ok = return
-	}
-	rest
-}
-authenticate {
-	Auth-Type MS-CHAP {
-		mschap
-	}
-	eap
-}
-session {
-}
-post-auth {
-  redundant {
-    rest
-    ok
-  }
-  Post-Auth-Type REJECT {
-    redundant {
-      rest
-      fail
+
+    authorize {
+        filter_username
+        eap
+        if (ok) {
+            govlogger
+            return
+        }
+        govlogger
+        rest
     }
-  }
-}
-pre-proxy {
-}
-post-proxy {
-	eap
-}
+
+    authenticate {
+        Auth-Type MS-CHAP {
+            mschap
+        }
+        eap
+    }
+
+    post-auth {
+        govlogger
+        redundant {
+            rest
+            ok
+        }
+
+        Post-Auth-Type REJECT {
+            govlogger
+            redundant {
+                rest
+                fail
+            }
+        }
+    }
+
+    pre-proxy {
+    }
+
+    post-proxy {
+        eap
+    }
 }

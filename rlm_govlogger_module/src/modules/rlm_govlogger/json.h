@@ -1,0 +1,68 @@
+#pragma once
+/*
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or (at
+ *   your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the Free Software
+ *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
+ */
+
+/**
+ * $Id: 132db6f2fa50364ebb04c0f4122f1202a84464c6 $
+ * @file lib/json/base.h
+ * @brief Implements the evaluation and parsing functions for the FreeRADIUS version of jpath.
+ *
+ * @author Arran Cudbard-Bell
+ * @author Matthew Newton
+ *
+ * @copyright 2015 Arran Cudbard-Bell (a.cudbardb@freeradius.org)
+ * @copyright 2015,2021 Network RADIUS SARL (legal@networkradius.com)
+ * @copyright 2015 The FreeRADIUS Server Project
+ */
+RCSIDH(json_h, "$Id: 132db6f2fa50364ebb04c0f4122f1202a84464c6 $")
+
+#include <freeradius-devel/radiusd.h>
+#include "conf_parse.h"
+
+#ifdef HAVE_JSON
+
+#ifdef HAVE_WDOCUMENTATION
+DIAG_OFF(documentation)
+#endif
+
+#  if defined(HAVE_JSONMC_JSON_H)
+#    include <json-c/json.h>
+#  elif defined(HAVE_JSON_JSON_H)
+#    include <json/json.h>
+#  else
+#    error "Need json-c headers"
+#  endif
+
+#ifdef HAVE_WDOCUMENTATION
+DIAG_ON(documentation)
+#endif
+
+/* for json-c < 0.13 */
+#ifndef HAVE_JSON_OBJECT_OBJECT_ADD_EX
+#  define json_object_object_add_ex(_obj, _key, _val, _opt) json_object_object_add(_obj, _key, _val)
+#endif
+
+#  include <freeradius-devel/radiusd.h>
+
+extern const FR_NAME_NUMBER fr_json_format_table[];
+
+json_object	*json_object_from_attr_value(TALLOC_CTX *ctx, VALUE_PAIR const *vp, bool always_string, bool enum_as_int, bool dates_as_int);
+void		fr_json_version_print(void);
+char		*fr_json_afrom_pair_list(TALLOC_CTX *ctx, VALUE_PAIR *vps,
+    rlm_govlogger_t const *format);
+bool		fr_json_format_verify(rlm_govlogger_t const *inst, bool verbose);
+char		*fr_json_from_string(TALLOC_CTX *ctx, char const *s, bool include_quotes);
+#endif
