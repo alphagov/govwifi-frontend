@@ -1,7 +1,7 @@
 
 govlogger {
-    log_file = "banana.log"
-    rotated_log_file = "banana.rotated"
+    log_file = "govwifi.log"
+    rotated_log_file = "govwifi.rotated"
     rotate_interval = 10
     log_prog_command = "rm banana.rotated"
 
