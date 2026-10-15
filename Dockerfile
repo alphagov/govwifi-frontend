@@ -16,7 +16,12 @@ RUN rm -rf ./freeradius-server-3.2.2
 RUN rm -rf /etc/raddb/mods-enabled/* /etc/raddb/sites-enabled/* /etc/raddb/dh && \
     openssl dhparam -out /etc/raddb/dh 1024 && \
     mkdir -p /tmp/radiusd
+
+# Copy the radius config files and make them read only to radius user
+# This ensures any malicious attack cannot alter the configuration
 COPY radius /etc/raddb
+RUN adduser -D -H -u 1000 radius radius
+RUN chown -R root:radius /etc/raddb && find /etc/raddb -type d -exec chmod 2750 {} \; && find /etc/raddb -type f -exec chown 640 {} \;
 
 RUN curl https://github.com/bvantagelimited/freeradius_exporter/releases/download/0.1.6/freeradius_exporter-0.1.6-amd64.tar.gz --location --output freeradius_exporter.tar.gz \
     && echo "38bf31e6a35e2afe0959e9f6eb90b1beb6b84e32d02448ee1005093ee322f173  freeradius_exporter.tar.gz" > checksums \
@@ -47,4 +52,7 @@ RUN bundle install
 RUN rm -rf /etc/raddb/certs
 VOLUME /etc/raddb/certs
 EXPOSE 1812/udp 1813/udp 3000 9812
+
+# Add the radius user and run using this
+USER radius
 CMD /usr/bin/run.sh
