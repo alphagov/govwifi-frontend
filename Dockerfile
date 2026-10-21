@@ -1,4 +1,4 @@
-FROM ruby:3.4.7-alpine3.22
+FROM ruby:3.4.11-alpine3.24
 
 RUN apk --update --no-cache add wpa_supplicant openssl make gcc libc-dev curl talloc-dev jq g++ zlib-dev \
     openssl-dev ca-certificates linux-headers python3 py3-pip py3-wheel net-tools tmux sqlite-libs \
